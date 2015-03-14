@@ -94,13 +94,18 @@ ReactFreeStyle.prototype.add = function (o) {
  */
 ReactFreeStyle.prototype.remove = function (o) {
   var hash = o.getHash()
-  var refs = this.counter[hash] = (this.counter[hash] - 1) || 0
+  var refs = this.counter[hash]
 
-  if (!refs) {
-    FreeStyle.prototype.remove.call(this, o)
+  if (refs > 0) {
+    refs--
+    this.counter[hash] = refs
 
-    if (this.el) {
-      this.el.innerHTML = this.getStyles()
+    if (!refs) {
+      FreeStyle.prototype.remove.call(this, o)
+
+      if (this.el) {
+        this.el.innerHTML = this.getStyles()
+      }
     }
   }
 }
