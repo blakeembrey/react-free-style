@@ -166,7 +166,7 @@ function createMixin (reactFreeStyle) {
       )
     },
 
-    componentWillMount: function () {
+    componentDidMount: function () {
       this._freeStyleSheet = reactFreeStyle.ref()
       this._freeStyleCache = {}
     },
