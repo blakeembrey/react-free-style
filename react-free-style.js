@@ -181,7 +181,7 @@ function createMixin (reactFreeStyle) {
  */
 module.exports = {
 
-  create: function () {
+  fresh: function () {
     return new ReactFreeStyle()
   }
 

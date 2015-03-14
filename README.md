@@ -55,16 +55,16 @@ freeStyle.registerKeyframes({
 Use the mixin to automatically attach and detach styles when the component is mounted. The mixin will also add `registerClass` and `registerKeyframes` methods to the component for temporary inline styles.
 
 ```js
-var style = require('react-free-style').create()
+var Style = require('react-free-style').fresh()
 
-var BUTTON_STYLE = style.registerClass({
+var BUTTON_STYLE = Style.registerClass({
   backgroundColor: 'red',
   padding: 10
 })
 
 module.exports = React.createClass({
 
-  mixin: [style.Mixin]
+  mixins: [Style.Mixin]
 
   render: function () {
     var inlineStyle = this.registerClass(this.props.style)
