@@ -1,0 +1,44 @@
+{
+  "name": "react-free-style",
+  "version": "0.0.0",
+  "description": "Combine the free style with React components",
+  "main": "react-free-style.js",
+  "files": [
+    "react-free-style.js",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "standard",
+    "test-spec": "mocha -R spec --bail",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test": "npm run lint && npm run test-cov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/blakeembrey/react-free-style.git"
+  },
+  "keywords": [
+    "style",
+    "css",
+    "object",
+    "react",
+    "inline"
+  ],
+  "author": "Blake Embrey <hello@blakeembrey.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blakeembrey/react-free-style/issues"
+  },
+  "homepage": "https://github.com/blakeembrey/react-free-style",
+  "devDependencies": {
+    "chai": "^2.1.1",
+    "istanbul": "^0.3.5",
+    "mocha": "^2.1.0",
+    "pre-commit": "^1.0.1",
+    "react": "^0.13.0",
+    "standard": "^2.1.1"
+  },
+  "dependencies": {
+    "free-style": "^0.2.3"
+  }
+}

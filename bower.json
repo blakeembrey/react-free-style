@@ -1,0 +1,25 @@
+{
+  "name": "react-free-style",
+  "version": "0.0.0",
+  "homepage": "https://github.com/blakeembrey/react-free-style",
+  "authors": [
+    "Blake Embrey <hello@blakeembrey.com>"
+  ],
+  "description": "Combine the free style with React components",
+  "main": "react-free-style.js",
+  "keywords": [
+    "style",
+    "css",
+    "object",
+    "react",
+    "inline"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
