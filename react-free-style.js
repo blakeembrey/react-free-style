@@ -83,6 +83,8 @@ ReactFreeStyle.prototype.add = function (o) {
       this.el.innerHTML = this.getStyles()
     }
   }
+
+  return o
 }
 
 /**
