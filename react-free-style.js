@@ -1,6 +1,7 @@
 var React = require('react')
 var FreeStyle = require('free-style').FreeStyle
 var ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
+var ExecutionEnvironment = require('react/lib/ExecutionEnvironment')
 
 /**
  * Create a React Free Style instance.
@@ -104,8 +105,10 @@ function createElement (reactFreeStyle) {
    */
   var Style = React.createClass({
 
-    componentDidMount: function () {
-      reactFreeStyle.addChangeListener(this.onChange)
+    componentWillMount: function () {
+      if (ExecutionEnvironment.canUseDOM) {
+        reactFreeStyle.addChangeListener(this.onChange)
+      }
     },
 
     componentWillUnmount: function () {
