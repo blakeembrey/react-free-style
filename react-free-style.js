@@ -70,12 +70,8 @@ ReactFreeStyle.prototype.unref = function () {
  * @param {(Namespace|Keyframes)} o
  */
 ReactFreeStyle.prototype.add = function (o) {
-  var hash = o.getHash()
+  this.counter[o.hash] = (this.counter[o.hash] || 0) + 1
 
-  // Increment the reference counter.
-  this.counter[hash] = (this.counter[hash] || 0) + 1
-
-  // Append to the style element automatically.
   if (!this.has(o)) {
     FreeStyle.prototype.add.call(this, o)
 
@@ -93,12 +89,11 @@ ReactFreeStyle.prototype.add = function (o) {
  * @param {(Namespace|Keyframes)} o
  */
 ReactFreeStyle.prototype.remove = function (o) {
-  var hash = o.getHash()
-  var refs = this.counter[hash]
+  var refs = this.counter[o.hash]
 
   if (refs > 0) {
     refs--
-    this.counter[hash] = refs
+    this.counter[o.hash] = refs
 
     if (!refs) {
       FreeStyle.prototype.remove.call(this, o)
@@ -124,10 +119,8 @@ function createMixin (reactFreeStyle) {
    * @param {(Namespace|Keyframes)} style
    */
   function addCache (cache, o) {
-    var hash = o.getHash()
-
-    if (!cache[hash]) {
-      cache[hash] = o
+    if (!cache[o.hash]) {
+      cache[o.hash] = o
       reactFreeStyle.add(o)
     }
 
