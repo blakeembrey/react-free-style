@@ -39,6 +39,6 @@
     "standard": "^2.1.1"
   },
   "dependencies": {
-    "free-style": "^0.2.3"
+    "free-style": "^0.3.0"
   }
 }

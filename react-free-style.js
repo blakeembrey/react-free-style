@@ -21,8 +21,8 @@ ReactFreeStyle.prototype = Object.create(FreeStyle.prototype)
 /**
  * Create and register a new class.
  */
-ReactFreeStyle.prototype.registerClass = function () {
-  return this.add(this.createClass.apply(this, arguments))
+ReactFreeStyle.prototype.registerStyle = function () {
+  return this.add(this.createStyle.apply(this, arguments))
 }
 
 /**
@@ -152,17 +152,17 @@ function createMixin (reactFreeStyle) {
    */
   var Mixin = {
 
-    registerClass: function () {
+    registerStyle: function () {
       return addCache(
         this._freeStyleCache,
-        reactFreeStyle.style.createClass.apply(reactFreeStyle.style, arguments)
+        reactFreeStyle.createStyle.apply(reactFreeStyle, arguments)
       )
     },
 
     registerKeyframes: function () {
       return addCache(
         this._freeStyleCache,
-        reactFreeStyle.style.createKeyframes.apply(reactFreeStyle.style, arguments)
+        reactFreeStyle.createKeyframes.apply(reactFreeStyle, arguments)
       )
     },
 

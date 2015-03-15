@@ -18,7 +18,7 @@ npm install react-free-style --save
 ```js
 var style = require('react-free-style').create()
 
-var STYLE = freeStyle.registerClass({
+var STYLE = freeStyle.registerStyle({
   backgroundColor: 'red'
 })
 
@@ -28,12 +28,12 @@ React.render(
 )
 ```
 
-### Register Class
+### Register Style
 
 Register [name spaced styles](https://github.com/blakeembrey/free-style#namespaced-styles) for the component.
 
 ```js
-style.registerClass({
+style.registerStyle({
   backgroundColor: 'red',
   padding: 10
 })
@@ -52,12 +52,12 @@ freeStyle.registerKeyframes({
 
 ### Mixin
 
-Use the mixin to automatically attach and detach styles when the component is mounted. The mixin will also add `registerClass` and `registerKeyframes` methods to the component for temporary inline styles.
+Use the mixin to automatically attach and detach styles when the component is mounted. The mixin will also add `registerStyle` and `registerKeyframes` methods to the component for temporary inline styles.
 
 ```js
 var Style = require('react-free-style').fresh()
 
-var BUTTON_STYLE = Style.registerClass({
+var BUTTON_STYLE = Style.registerStyle({
   backgroundColor: 'red',
   padding: 10
 })
@@ -67,7 +67,7 @@ module.exports = React.createClass({
   mixins: [Style.Mixin]
 
   render: function () {
-    var inlineStyle = this.registerClass(this.props.style)
+    var inlineStyle = this.registerStyle(this.props.style)
 
     return <button className={style.join(inlineStyle.className, BUTTON_STYLE.className)} />
   }
