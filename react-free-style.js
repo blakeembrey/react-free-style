@@ -1,4 +1,6 @@
+var React = require('react')
 var FreeStyle = require('free-style').FreeStyle
+var ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
 
 /**
  * Create a React Free Style instance.
@@ -6,11 +8,7 @@ var FreeStyle = require('free-style').FreeStyle
 function ReactFreeStyle () {
   FreeStyle.call(this)
 
-  this.refs = 0
-  this.counter = {}
-  this.el = undefined
-
-  this.Mixin = createMixin(this)
+  this.Element = createElement(this)
 }
 
 /**
@@ -19,90 +17,34 @@ function ReactFreeStyle () {
 ReactFreeStyle.prototype = Object.create(FreeStyle.prototype)
 
 /**
- * Create and register a new class.
- */
-ReactFreeStyle.prototype.registerStyle = function () {
-  return this.add(this.createStyle.apply(this, arguments))
-}
-
-/**
- * Create and register key frame animations.
- */
-ReactFreeStyle.prototype.registerKeyframes = function () {
-  return this.add(this.createKeyframes.apply(this, arguments))
-}
-
-/**
- * Increment the style reference count and append on initial increment.
+ * Create a new React Free Style instance.
  *
- * @return {Element}
+ * @return {ReactFreeStyle}
  */
-ReactFreeStyle.prototype.ref = function () {
-  if (this.refs === 0) {
-    this.el = document.createElement('style')
-    this.el.innerHTML = this.getStyles()
-    document.head.appendChild(this.el)
-  }
-
-  this.refs++
-
-  return this.el
+ReactFreeStyle.prototype.fresh = function () {
+  return new ReactFreeStyle()
 }
 
 /**
- * Decrement the style reference count and remove at zero.
- */
-ReactFreeStyle.prototype.unref = function () {
-  this.refs--
-
-  if (this.refs === 0) {
-    if (this.el && this.el.parentNode) {
-      this.el.parentNode.removeChild(this.el)
-    }
-
-    this.el = undefined
-  }
-}
-
-/**
- * Add to the cache and style sheet automatically.
+ * Create a mixin for React.
  *
- * @param {(Namespace|Keyframes)} o
+ * @return {Object}
  */
-ReactFreeStyle.prototype.add = function (o) {
-  this.counter[o.hash] = (this.counter[o.hash] || 0) + 1
-
-  if (!this.has(o)) {
-    FreeStyle.prototype.add.call(this, o)
-
-    if (this.el) {
-      this.el.innerHTML = this.getStyles()
-    }
-  }
-
-  return o
+ReactFreeStyle.prototype.mixin = function () {
+  return createMixin(this)
 }
 
 /**
- * Remove from the cache and style sheet automatically.
- *
- * @param {(Namespace|Keyframes)} o
+ * Override `emitChange` to catch invalid uses in React.
  */
-ReactFreeStyle.prototype.remove = function (o) {
-  var refs = this.counter[o.hash]
+ReactFreeStyle.prototype.emitChange = function () {
+  if (ReactCurrentOwner.current != null) {
+    console.warn('Inline styles must be registered before `render`')
 
-  if (refs > 0) {
-    refs--
-    this.counter[o.hash] = refs
-
-    if (!refs) {
-      FreeStyle.prototype.remove.call(this, o)
-
-      if (this.el) {
-        this.el.innerHTML = this.getStyles()
-      }
-    }
+    return
   }
+
+  FreeStyle.prototype.emitChange.apply(this, arguments)
 }
 
 /**
@@ -113,60 +55,36 @@ ReactFreeStyle.prototype.remove = function (o) {
  */
 function createMixin (reactFreeStyle) {
   /**
-   * Add to the temporary style cache.
-   *
-   * @param {Object}                cache
-   * @param {(Namespace|Keyframes)} style
-   */
-  function addCache (cache, o) {
-    if (!cache[o.hash]) {
-      cache[o.hash] = o
-      reactFreeStyle.add(o)
-    }
-
-    return o
-  }
-
-  /**
-   * Remove all temporary styles.
-   *
-   * @param {Object} cache
-   */
-  function emptyCache (cache) {
-    Object.keys(cache).forEach(function (key) {
-      reactFreeStyle.remove(cache[key])
-    })
-  }
-
-  /**
-   * Create the mixin interface.
+   * Create a React.js mixin for inline styles.
    *
    * @type {Object}
    */
   var Mixin = {
 
     registerStyle: function () {
-      return addCache(
-        this._freeStyleCache,
-        reactFreeStyle.createStyle.apply(reactFreeStyle, arguments)
-      )
+      var o = reactFreeStyle.registerStyle.apply(reactFreeStyle, arguments)
+      this._freeStyleCache[o.hash] = o
+      return o
     },
 
     registerKeyframes: function () {
-      return addCache(
-        this._freeStyleCache,
-        reactFreeStyle.createKeyframes.apply(reactFreeStyle, arguments)
-      )
+      var o = reactFreeStyle.registerKeyframes.apply(reactFreeStyle, arguments)
+      this._freeStyleCache[o.hash] = o
+      return o
     },
 
-    componentDidMount: function () {
-      this._freeStyleSheet = reactFreeStyle.ref()
+    componentWillMount: function () {
       this._freeStyleCache = {}
     },
 
     componentWillUnmount: function () {
-      this._freeStyleSheet = reactFreeStyle.unref()
-      this._freeStyleCache = emptyCache(this._freeStyleCache)
+      var cache = this._freeStyleCache
+
+      Object.keys(cache).forEach(function (key) {
+        reactFreeStyle.remove(cache[key])
+      })
+
+      this._freeStyleCache = undefined
     }
 
   }
@@ -175,14 +93,39 @@ function createMixin (reactFreeStyle) {
 }
 
 /**
- * Export the external API.
+ * Create a React style component.
  *
- * @type {Object}
+ * @param  {ReactFreeStyle} reactFreeStyle
+ * @return {ReactElement}
  */
-module.exports = {
+function createElement (reactFreeStyle) {
+  /**
+   * Create a style element.
+   */
+  var Style = React.createClass({
 
-  fresh: function () {
-    return new ReactFreeStyle()
-  }
+    componentDidMount: function () {
+      reactFreeStyle.addChangeListener(this.onChange)
+    },
 
+    componentWillUnmount: function () {
+      reactFreeStyle.removeChangeListener(this.onChange)
+    },
+
+    onChange: function () {
+      this.forceUpdate()
+    },
+
+    render: function () {
+      return React.createElement('style', null, reactFreeStyle.getStyles())
+    }
+
+  })
+
+  return Style
 }
+
+/**
+ * Export the interface.
+ */
+module.exports = new ReactFreeStyle()

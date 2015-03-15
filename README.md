@@ -5,35 +5,42 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components.
+**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and updating `<style />`.
 
 ## Installation
 
-```sh
+```
 npm install react-free-style --save
 ```
 
 ## Usage
 
 ```js
-var style = require('react-free-style').create()
+var Style = require('react-free-style')
 
-var STYLE = freeStyle.registerStyle({
+var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-React.render(
-  <div className={STYLE.className}>Hello world!</div>,
-  document.body
+var App = (
+  <div>
+    <div className={TEXT_STYLE.className}>Hello world!</div>
+
+    <Style.Element />
+  </div>
 )
+
+React.render(App, document.body)
 ```
+
+**Please note:** `<Style.Element />` should be rendered last if you want to support server-side rendering. This is a limitation with React.js because we can not trigger the state updates that are required by the mixin for inline styles.
 
 ### Register Style
 
-Register [name spaced styles](https://github.com/blakeembrey/free-style#namespaced-styles) for the component.
+Register a [name spaced style](https://github.com/blakeembrey/free-style#namespaced-styles) object.
 
 ```js
-style.registerStyle({
+Style.registerStyle({
   backgroundColor: 'red',
   padding: 10
 })
@@ -41,10 +48,10 @@ style.registerStyle({
 
 ### Register Keyframes
 
-Register [name spaced keyframes](https://github.com/blakeembrey/free-style#keyframes) for the component.
+Register a [name spaced keyframes](https://github.com/blakeembrey/free-style#keyframes) object.
 
 ```js
-freeStyle.registerKeyframes({
+Style.registerKeyframes({
   from: { color: 'red' },
   to: { color: 'blue' }
 })
@@ -52,28 +59,37 @@ freeStyle.registerKeyframes({
 
 ### Mixin
 
-Use the mixin to automatically attach and detach styles when the component is mounted. The mixin will also add `registerStyle` and `registerKeyframes` methods to the component for temporary inline styles.
+Use the mixin to automatically attach and detach styles when the component is rendered.
 
 ```js
-var Style = require('react-free-style').fresh()
+var Style = require('react-free-style')
 
 var BUTTON_STYLE = Style.registerStyle({
   backgroundColor: 'red',
   padding: 10
 })
 
-module.exports = React.createClass({
+var ButtonComponent = React.createClass({
 
-  mixins: [Style.Mixin]
+  mixins: [Style.mixin()],
+
+  componentWillMount: function () {
+    this.inlineStyle = this.registerStyle(this.props.style)
+  },
 
   render: function () {
-    var inlineStyle = this.registerStyle(this.props.style)
-
-    return <button className={style.join(inlineStyle.className, BUTTON_STYLE.className)} />
+    return <button className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>{this.props.children}</button>
   }
 
 })
+
+React.render(
+  <div><ButtonComponent /><Style.Element /></div>,
+  document.body
+)
 ```
+
+**Please note:** Inline style registration can not occur in the `render` method.
 
 ## License
 
