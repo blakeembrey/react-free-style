@@ -57,7 +57,9 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
     },
 
     getChildContext () {
-      var context: ChildContext = { _freeStyle: freeStyle }
+      var context: ChildContext = {
+        _freeStyle: this.context._freeStyle || freeStyle
+      }
 
       return context
     },
