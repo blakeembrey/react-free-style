@@ -16,7 +16,7 @@ npm install react-free-style --save
 ## Usage
 
 ```js
-var Style = require('react-free-style')
+var Style = require('react-free-style').create()
 
 var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
@@ -59,10 +59,10 @@ Style.registerKeyframes({
 
 ### Mixin
 
-Use the mixin to automatically attach and detach styles when the component is rendered.
+Use the mixin to automatically attach and detach styles when the component is rendered. This will also push the rendered styles to the parent `ReactFreeStyle` instance so only a single `<Style.Element />` needs to be output.
 
 ```js
-var Style = require('react-free-style')
+var Style = require('react-free-style').create()
 
 var BUTTON_STYLE = Style.registerStyle({
   backgroundColor: 'red',
@@ -71,7 +71,7 @@ var BUTTON_STYLE = Style.registerStyle({
 
 var ButtonComponent = React.createClass({
 
-  mixins: [Style.mixin()],
+  mixins: [Style.Mixin],
 
   componentWillMount: function () {
     this.inlineStyle = this.registerStyle(this.props.style)

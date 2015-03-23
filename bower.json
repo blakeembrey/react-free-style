@@ -6,7 +6,7 @@
     "Blake Embrey <hello@blakeembrey.com>"
   ],
   "description": "Combine the free style with React components",
-  "main": "react-free-style.js",
+  "main": "dist/react-free-style.js",
   "keywords": [
     "style",
     "css",
@@ -14,6 +14,9 @@
     "react",
     "inline"
   ],
+  "scripts": {
+    "postinstall": "npm install && npm run build"
+  },
   "license": "MIT",
   "ignore": [
     "**/.*",
@@ -21,5 +24,8 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "typescript": {
+    "definition": "react-free-style.d.ts"
+  }
 }

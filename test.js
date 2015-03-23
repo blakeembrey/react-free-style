@@ -1,12 +1,14 @@
-/* global describe, it, afterEach */
+/* global describe, it, beforeEach */
 
 var expect = require('chai').expect
 var React = require('react')
-var Style = require('./')
+var ReactFreeStyle = require('./')
 
 describe('react free style', function () {
-  afterEach(function () {
-    Style.empty()
+  var Style
+
+  beforeEach(function () {
+    Style = ReactFreeStyle.create()
   })
 
   it('should render the style element', function () {
@@ -37,34 +39,43 @@ describe('react free style', function () {
     })
 
     var Button = React.createClass({
-
-      mixins: [Style.mixin()],
-
-      componentWillMount: function () {
-        inlineStyle = this.inlineStyle = this.registerStyle(this.props.style)
-      },
-
+      mixins: [Style.Mixin],
       render: function () {
         return React.createElement(
           'button',
-          { className: Style.join(this.inlineStyle.className, BUTTON_STYLE.className) },
-          this.props.children
+          { className: BUTTON_STYLE.className },
+          React.createElement(Child)
         )
       }
+    })
 
+    var Child = React.createClass({
+      mixins: [Style.Mixin],
+      componentWillMount: function () {
+        inlineStyle = this.inlineStyle = this.registerStyle({ color: 'blue' })
+      },
+      render: function () {
+        return React.createElement(GrandChild, { className: this.inlineStyle.className })
+      }
+    })
+
+    var GrandChild = React.createClass({
+      render: function () {
+        return React.createElement('div', this.props, 'Hello world!')
+      }
     })
 
     var App = React.createElement(
       'div',
       null,
-      React.createElement(Button, { style: { color: 'red' } }, 'Hello world!'),
+      React.createElement(Button),
       React.createElement(Style.Element)
     )
 
     expect(React.renderToStaticMarkup(App)).to.match(new RegExp(
       '<div>' +
-      '<button class="' + inlineStyle.className + ' ' + BUTTON_STYLE.className + '">Hello world!</button>' +
-      '<style>' + BUTTON_STYLE.selector + '{background-color:red;}' + inlineStyle.selector + '{color:red;}</style>' +
+      '<button class="' + BUTTON_STYLE.className + '"><div class="' + inlineStyle.className + '">Hello world!</div></button>' +
+      '<style>' + BUTTON_STYLE.selector + '{background-color:red;}' + inlineStyle.selector + '{color:blue;}</style>' +
       '</div>'
     ))
   })
