@@ -12,6 +12,9 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   Mixin = createMixin(this)
   Element = createElement(this)
 
+  _parentCount: number = 0
+  _mountedCount: number = 0
+
   emitChange (type: string, style: FreeStyle.StyleType) {
     if (ReactCurrentOwner.current != null) {
       console.warn('Inline styles must be registered before `render`')
@@ -79,6 +82,12 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
       }
     },
 
+    _parentFreeStyle (): ReactFreeStyle {
+      var parent = this.context._freeStyle
+
+      return parent && parent !== freeStyle ? parent : null
+    },
+
     registerStyle () {
       return this._addFreeStyle(freeStyle.createStyle.apply(freeStyle, arguments))
     },
@@ -88,18 +97,26 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
     },
 
     componentWillMount () {
-      var parent = this.context._freeStyle
+      var parent = this._parentFreeStyle()
 
       this._freeStyleCache = {}
 
       if (parent) {
+        freeStyle._parentCount++
         parent.attach(freeStyle)
+      }
+    },
+
+    // TODO: Figure out how to do this on the server-side.
+    componentDidMount () {
+      if (!this.context._freeStyle && freeStyle._mountedCount === 0) {
+        console.warn('React Free Style component has not been mounted (%s)', freeStyle.id)
       }
     },
 
     componentWillUnmount () {
       var cache = this._freeStyleCache
-      var parent = this.context._freeStyle
+      var parent = this._parentFreeStyle()
 
       Object.keys(cache).forEach((key) => {
         return cache[key] && this._removeFreeStyle(cache[key])
@@ -108,6 +125,7 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
       this._freeStyleCache = undefined
 
       if (parent) {
+        freeStyle._parentCount--
         parent.detach(freeStyle)
       }
     }
@@ -120,19 +138,22 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
 /**
  * Create an element to mount for the current instance.
  */
-function createElement (style: ReactFreeStyle): React.ClassicComponentClass<{}> {
+function createElement (freeStyle: ReactFreeStyle): React.ClassicComponentClass<{}> {
   var Style = React.createClass({
 
     displayName: 'Style.Element',
 
     componentWillMount () {
+      freeStyle._mountedCount++
+
       if (ExecutionEnvironment.canUseDOM) {
-        style.addChangeListener(this.onChange)
+        freeStyle.addChangeListener(this.onChange)
       }
     },
 
     componentWillUnmount () {
-      style.removeChangeListener(this.onChange)
+      freeStyle._mountedCount--
+      freeStyle.removeChangeListener(this.onChange)
     },
 
     onChange () {
@@ -140,7 +161,12 @@ function createElement (style: ReactFreeStyle): React.ClassicComponentClass<{}> 
     },
 
     render () {
-      return React.createElement('style', null, style.getStyles())
+      // Avoid rendering more than once.
+      if (freeStyle._parentCount) {
+        return null
+      }
+
+      return React.createElement('style', null, freeStyle.getStyles())
     }
 
   })
