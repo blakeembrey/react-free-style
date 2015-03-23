@@ -50,6 +50,6 @@
     "free-style": "^0.5.1"
   },
   "peerDependencies": {
-    "react": ">=0.13.0"
+    "react": ">=0.12.0"
   }
 }
