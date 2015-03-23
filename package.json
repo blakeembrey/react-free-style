@@ -1,7 +1,7 @@
 {
   "name": "react-free-style",
   "version": "0.3.2",
-  "description": "Combine the free style with React components",
+  "description": "Make React components easier and more maintainable by using inline style objects with Free Style",
   "main": "dist/react-free-style.js",
   "files": [
     "dist/",
