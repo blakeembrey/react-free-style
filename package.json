@@ -1,6 +1,6 @@
 {
   "name": "react-free-style",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Combine the free style with React components",
   "main": "dist/react-free-style.js",
   "files": [
