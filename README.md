@@ -22,15 +22,22 @@ var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-var App = (
-  <div>
-    <div className={TEXT_STYLE.className}>Hello world!</div>
+var App = Reacte.createClass({
 
-    <Style.Element />
-  </div>
-)
+  mixins: [Style.Mixin],
 
-React.render(App, document.body)
+  render: function () {
+    return (
+      <div>
+        <div className={TEXT_STYLE.className}>Hello world!</div>
+        <Style.Element />
+      </div>
+    )
+  }
+
+})
+
+React.render(React.createElement(App), document.body)
 ```
 
 **Please note:** `<Style.Element />` should be rendered last if you want to support server-side rendering. This is a limitation with React.js because we can not trigger the state updates that are required by the mixin for inline styles.
@@ -57,9 +64,9 @@ Style.registerKeyframes({
 })
 ```
 
-### Mixin
+### Dynamic Styles
 
-Use the mixin to automatically attach and detach styles when the component is rendered. This will also push the rendered styles to the parent `ReactFreeStyle` instance so only a single `<Style.Element />` needs to be output.
+Inline (dynamic) styles can be registered using the `registerStyle` and `registerKeyframes` methods on your React component. Any styles registered will follow the React lifecycle and automatically remove when the component is unmounted.
 
 ```js
 var Style = require('react-free-style').create()
@@ -83,10 +90,17 @@ var ButtonComponent = React.createClass({
 
 })
 
-React.render(
-  <div><ButtonComponent /><Style.Element /></div>,
-  document.body
-)
+var App = React.createClass({
+
+  mixins: [Style.Mixin],
+
+  render: function () {
+    return <div><ButtonComponent>Hello world!</ButtonComponent><Style.Element /></div>
+  }
+
+})
+
+React.render(React.createElement(App), document.body)
 ```
 
 **Please note:** Inline style registration can not occur in the `render` method.
