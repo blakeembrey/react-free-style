@@ -12,9 +12,6 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   Mixin = createMixin(this)
   Element = createElement(this)
 
-  _parentCount: number = 0
-  _mountedCount: number = 0
-
   emitChange (type: string, style: FreeStyle.StyleType) {
     if (ReactCurrentOwner.current != null) {
       console.warn('Inline styles must be registered before `render`')
@@ -26,13 +23,21 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   }
 }
 
+class RefReactFreeStyle extends ReactFreeStyle {
+  constructor (public parent: ReactFreeStyle) {
+    super()
+  }
+
+  _mountedCount: number = 0
+}
+
 export type ChildContext = {
-  _freeStyle: ReactFreeStyle
+  freeStyle: ReactFreeStyle
 }
 
 export interface ReactFreeStyleMixin {
-  contextTypes: { _freeStyle: any }
-  childContextTypes: { _freeStyle: any }
+  contextTypes: { freeStyle: any }
+  childContextTypes: { freeStyle: any }
 
   getChildContext: () => ChildContext
   registerStyle: () => FreeStyle.Style
@@ -45,20 +50,25 @@ export interface ReactFreeStyleMixin {
 /**
  * Create a mixin for the free style instance.
  */
-function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
+function createMixin (Style: ReactFreeStyle): ReactFreeStyleMixin {
+  var _freeStyle: ReactFreeStyle
+
+  /**
+   * Create a render mixin for styles.
+   */
   var Mixin: ReactFreeStyleMixin = {
 
     contextTypes: {
-      _freeStyle: React.PropTypes.object
+      freeStyle: React.PropTypes.object
     },
 
     childContextTypes: {
-      _freeStyle: React.PropTypes.object.isRequired
+      freeStyle: React.PropTypes.object.isRequired
     },
 
     getChildContext () {
       var context: ChildContext = {
-        _freeStyle: this.context._freeStyle || freeStyle
+        freeStyle: this._getFreeStyle()
       }
 
       return context
@@ -69,7 +79,7 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
 
       if (!cache[o.id]) {
         cache[o.id] = o
-        freeStyle.add(o)
+        Style.add(o)
       }
 
       return o
@@ -80,56 +90,46 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
 
       if (cache[o.id]) {
         cache[o.id] = undefined
-        freeStyle.remove(o)
+        Style.remove(o)
       }
     },
 
-    _parentFreeStyle (): ReactFreeStyle {
-      var parent = this.context._freeStyle
-
-      return parent && parent !== freeStyle ? parent : null
+    _getFreeStyle () {
+      return this.context.freeStyle || _freeStyle || (_freeStyle = new RefReactFreeStyle(Style))
     },
 
     registerStyle () {
-      return this._addFreeStyle(freeStyle.createStyle.apply(freeStyle, arguments))
+      return this._addFreeStyle(Style.createStyle.apply(Style, arguments))
     },
 
     registerKeyframes () {
-      return this._addFreeStyle(freeStyle.createKeyframes.apply(freeStyle, arguments))
+      return this._addFreeStyle(Style.createKeyframes.apply(Style, arguments))
     },
 
     componentWillMount () {
-      var parent = this._parentFreeStyle()
+      var parent = this._getFreeStyle()
 
+      parent.attach(Style)
       this._freeStyleCache = {}
-
-      if (parent) {
-        freeStyle._parentCount++
-        parent.attach(freeStyle)
-      }
     },
 
     // TODO: Figure out how to do this on the server-side.
     componentDidMount () {
-      if (!this.context._freeStyle && freeStyle._mountedCount === 0) {
-        console.warn('React Free Style component has not been mounted (%s)', freeStyle.id)
+      if (this._getFreeStyle()._mountedCount === 0) {
+        console.warn('React Free Style component has not been mounted (%s)', Style.id)
       }
     },
 
     componentWillUnmount () {
       var cache = this._freeStyleCache
-      var parent = this._parentFreeStyle()
+      var parent = this._getFreeStyle()
 
       Object.keys(cache).forEach((key) => {
         return cache[key] && this._removeFreeStyle(cache[key])
       })
 
+      parent.detach(Style)
       this._freeStyleCache = undefined
-
-      if (parent) {
-        freeStyle._parentCount--
-        parent.detach(freeStyle)
-      }
     }
 
   }
@@ -140,40 +140,60 @@ function createMixin (freeStyle: ReactFreeStyle): ReactFreeStyleMixin {
 /**
  * Create an element to mount for the current instance.
  */
-function createElement (freeStyle: ReactFreeStyle): React.ClassicComponentClass<{}> {
-  var Style = React.createClass({
+function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<{}> {
+  /**
+   * Get the current style string.
+   */
+  function getState () {
+    return {
+      styles: Style.getStyles()
+    }
+  }
+
+  /**
+   * Create a <Style /> element.
+   */
+  var StyleElement = React.createClass({
 
     displayName: 'Style.Element',
 
+    mixins: [Style.Mixin],
+
+    getInitialState: getState,
+
     componentWillMount () {
-      freeStyle._mountedCount++
+      if (!this.context.freeStyle) {
+        throw new Error('Styles must be attached using `Style.Mixin`')
+      }
+
+      this.context.freeStyle._mountedCount++
 
       if (ExecutionEnvironment.canUseDOM) {
-        freeStyle.addChangeListener(this.onChange)
+        this.context.freeStyle.addChangeListener(this.onChange)
       }
     },
 
     componentWillUnmount () {
-      freeStyle._mountedCount--
-      freeStyle.removeChangeListener(this.onChange)
+      this.context.freeStyle._mountedCount--
+      this.context.freeStyle.removeChangeListener(this.onChange)
     },
 
     onChange () {
-      this.forceUpdate()
+      this.setState(getState())
     },
 
     render () {
-      // Avoid rendering more than once.
-      if (freeStyle._parentCount) {
-        return null
+      // Mount when this is the root style.
+      if (this.context.freeStyle.parent === Style) {
+        return React.createElement('style', null, this.state.styles)
       }
 
-      return React.createElement('style', null, freeStyle.getStyles())
+      return null
     }
 
   })
 
-  return Style
+  return StyleElement
 }
 
 export function create () {
