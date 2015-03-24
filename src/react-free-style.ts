@@ -54,6 +54,39 @@ function createMixin (Style: ReactFreeStyle): ReactFreeStyleMixin {
   var _freeStyle: ReactFreeStyle
 
   /**
+   * Add a style to the temporary cache.
+   */
+  function add (Element: any, o: FreeStyle.StyleType): FreeStyle.StyleType {
+    var cache = Element._freeStyleCache
+
+    if (!cache[o.id]) {
+      cache[o.id] = o
+      Style.add(o)
+    }
+
+    return o
+  }
+
+  /**
+   * Remove a style from the temporary cache.
+   */
+  function remove (Element: any, o: FreeStyle.StyleType): void {
+    var cache = Element._freeStyleCache
+
+    if (cache[o.id]) {
+      cache[o.id] = undefined
+      Style.remove(o)
+    }
+  }
+
+  /**
+   * Get the element root style instance.
+   */
+  function getInstance (Element: any): RefReactFreeStyle {
+    return Element.context.freeStyle || _freeStyle || (_freeStyle = new RefReactFreeStyle(Style))
+  }
+
+  /**
    * Create a render mixin for styles.
    */
   var Mixin: ReactFreeStyleMixin = {
@@ -68,46 +101,22 @@ function createMixin (Style: ReactFreeStyle): ReactFreeStyleMixin {
 
     getChildContext () {
       var context: ChildContext = {
-        freeStyle: this._getFreeStyle()
+        freeStyle: getInstance(this)
       }
 
       return context
     },
 
-    _addFreeStyle (o: FreeStyle.StyleType): FreeStyle.StyleType {
-      var cache = this._freeStyleCache
-
-      if (!cache[o.id]) {
-        cache[o.id] = o
-        Style.add(o)
-      }
-
-      return o
-    },
-
-    _removeFreeStyle (o: FreeStyle.StyleType): void {
-      var cache = this._freeStyleCache
-
-      if (cache[o.id]) {
-        cache[o.id] = undefined
-        Style.remove(o)
-      }
-    },
-
-    _getFreeStyle () {
-      return this.context.freeStyle || _freeStyle || (_freeStyle = new RefReactFreeStyle(Style))
-    },
-
     registerStyle () {
-      return this._addFreeStyle(Style.createStyle.apply(Style, arguments))
+      return <FreeStyle.Style>add(this, Style.createStyle.apply(Style, arguments))
     },
 
     registerKeyframes () {
-      return this._addFreeStyle(Style.createKeyframes.apply(Style, arguments))
+      return <FreeStyle.Keyframes>add(this, Style.createKeyframes.apply(Style, arguments))
     },
 
     componentWillMount () {
-      var parent = this._getFreeStyle()
+      var parent = getInstance(this)
 
       parent.attach(Style)
       this._freeStyleCache = {}
@@ -115,17 +124,17 @@ function createMixin (Style: ReactFreeStyle): ReactFreeStyleMixin {
 
     // TODO: Figure out how to do this on the server-side.
     componentDidMount () {
-      if (this._getFreeStyle()._mountedCount === 0) {
+      if (getInstance(this)._mountedCount === 0) {
         console.warn('React Free Style component has not been mounted (%s)', Style.id)
       }
     },
 
     componentWillUnmount () {
       var cache = this._freeStyleCache
-      var parent = this._getFreeStyle()
+      var parent = getInstance(this)
 
       Object.keys(cache).forEach((key) => {
-        return cache[key] && this._removeFreeStyle(cache[key])
+        return cache[key] && remove(this, cache[key])
       })
 
       parent.detach(Style)
@@ -140,16 +149,7 @@ function createMixin (Style: ReactFreeStyle): ReactFreeStyleMixin {
 /**
  * Create an element to mount for the current instance.
  */
-function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<{}> {
-  /**
-   * Get the current style string.
-   */
-  function getState () {
-    return {
-      styles: Style.getStyles()
-    }
-  }
-
+function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<any> {
   /**
    * Create a <Style /> element.
    */
@@ -159,7 +159,11 @@ function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<{}> 
 
     mixins: [Style.Mixin],
 
-    getInitialState: getState,
+    getInitialState() {
+      return {
+        styles: this.context.freeStyle.getStyles()
+      }
+    },
 
     componentWillMount () {
       if (!this.context.freeStyle) {
@@ -179,7 +183,7 @@ function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<{}> 
     },
 
     onChange () {
-      this.setState(getState())
+      this.setState({ styles: this.context.freeStyle.getStyles() })
     },
 
     render () {
