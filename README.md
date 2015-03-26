@@ -7,6 +7,16 @@
 
 **React Free Style** was designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and re-rendering `<style />`. This even works with server-side rendering.
 
+## Why?
+
+Check out some of the reasons for [doing CSS in JS](https://github.com/blakeembrey/free-style#why). This adds on top of that formidable list for React.js specific functionality.
+
+**Also solved by using React Free Style**
+
+* Modular React.js components (automatically namespaced CSS)
+* Fast renders with automatic style mounting (outputs only the styles on page)
+* Create "temporary" styles (automatically register and remove styles with the component lifecycle)
+
 ## Installation
 
 ```
