@@ -9,13 +9,13 @@
 
 ## Why?
 
-Check out some of the reasons for [doing CSS in JS](https://github.com/blakeembrey/free-style#why). This adds on top of that formidable list for React.js specific functionality.
+Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/free-style#why). This module exposes the API directly to React.js.
 
-**Also solved by using React Free Style**
+**More improvements with React Free Style**
 
 * Modular React.js components (automatically namespaced CSS)
-* Fast renders with automatic style mounting (outputs only the styles on page)
-* Create "temporary" styles (automatically register and remove styles with the component lifecycle)
+* Fast renders with automatic style mounting (output only the styles on page)
+* Create "temporary" styles (register and remove styles with the component lifecycle)
 
 ## Installation
 
