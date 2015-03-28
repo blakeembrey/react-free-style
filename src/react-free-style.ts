@@ -5,6 +5,8 @@ import FreeStyle = require('free-style')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
 import ExecutionEnvironment = require('react/lib/ExecutionEnvironment')
 
+declare var module: any
+
 /**
  * Create a specialized free style instance.
  */
@@ -15,7 +17,6 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   emitChange (type: string, style: FreeStyle.StyleType) {
     if (ReactCurrentOwner.current != null) {
       console.warn('Inline styles must be registered before `render`')
-
       return
     }
 
@@ -200,6 +201,28 @@ function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<any>
   return StyleElement
 }
 
-export function create () {
-  return new ReactFreeStyle()
+var createFreeStyle: () => ReactFreeStyle
+
+if (module.hot) {
+  var freeStyleCache: { [id: string]: ReactFreeStyle } = {}
+
+  createFreeStyle = function () {
+    var e: any = new Error()
+    var id = e.stack.split('\n')[2]
+    var instance = freeStyleCache[id]
+
+    if (instance) {
+      instance.empty()
+
+      return instance
+    }
+
+    return (freeStyleCache[id] = new ReactFreeStyle())
+  }
+} else {
+  createFreeStyle = function () {
+    return new ReactFreeStyle()
+  }
 }
+
+export var create = createFreeStyle

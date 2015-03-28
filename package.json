@@ -47,7 +47,7 @@
     "typescript": "^1.4.1"
   },
   "dependencies": {
-    "free-style": "^0.5.1"
+    "free-style": "^0.5.2"
   },
   "peerDependencies": {
     "react": ">=0.12.0"
