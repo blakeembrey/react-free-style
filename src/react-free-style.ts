@@ -189,11 +189,13 @@ function createElement (Style: ReactFreeStyle): React.ClassicComponentClass<any>
 
     render () {
       // Mount when this is the root style.
-      if (this.context.freeStyle.parent === Style) {
-        return React.createElement('style', null, this.state.styles)
+      if (this.context.freeStyle.parent !== Style) {
+        return null
       }
 
-      return null
+      return React.createElement('style', {
+        dangerouslySetInnerHTML: { __html: this.state.styles }
+      })
     }
 
   })
