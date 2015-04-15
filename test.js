@@ -16,20 +16,13 @@ describe('react free style', function () {
       backgroundColor: 'red'
     })
 
-    var App = React.createClass({
-
-      mixins: [Style.Mixin],
+    var App = Style.component(React.createClass({
 
       render: function () {
-        return React.createElement(
-          'div',
-          null,
-          React.createElement('div', { className: TEXT_STYLE.className }, 'Hello world!'),
-          React.createElement(Style.Element)
-        )
+        return React.createElement('div', { className: TEXT_STYLE.className }, 'Hello world!')
       }
 
-    })
+    }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div>' +
@@ -49,10 +42,12 @@ describe('react free style', function () {
 
     var ButtonComponent = React.createClass({
 
-      mixins: [Style.Mixin],
-
       componentWillMount: function () {
-        inlineStyle = this.inlineStyle = this.registerStyle(this.props.style)
+        inlineStyle = this.inlineStyle = Style.registerStyle(this.props.style)
+      },
+
+      componentWillUnmount: function () {
+        Style.remove(this.inlineStyle)
       },
 
       render: function () {
@@ -67,24 +62,17 @@ describe('react free style', function () {
 
     })
 
-    var App = React.createClass({
-
-      mixins: [Style.Mixin],
+    var App = Style.component(React.createClass({
 
       render: function () {
         return React.createElement(
-          'div',
-          null,
-          React.createElement(
-            ButtonComponent,
-            { style: { color: 'blue'} },
-            'Hello world!'
-          ),
-          React.createElement(Style.Element)
+          ButtonComponent,
+          { style: { color: 'blue'} },
+          'Hello world!'
         )
       }
 
-    })
+    }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div>' +
@@ -105,9 +93,7 @@ describe('react free style', function () {
       backgroundColor: 'red'
     })
 
-    var Button = React.createClass({
-
-      mixins: [ChildStyle.Mixin],
+    var Button = ChildStyle.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -117,9 +103,9 @@ describe('react free style', function () {
         )
       }
 
-    })
+    }))
 
-    var Child = React.createClass({
+    var Child = ChildStyle.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -129,9 +115,9 @@ describe('react free style', function () {
         )
       }
 
-    })
+    }))
 
-    var App = React.createClass({
+    var App = Style.component(React.createClass({
 
       mixins: [Style.Mixin],
 
@@ -139,17 +125,18 @@ describe('react free style', function () {
         return React.createElement(
           'div',
           { className: APP_STYLE.className },
-          React.createElement(Child),
-          React.createElement(Style.Element)
+          React.createElement(Child)
         )
       }
 
-    })
+    }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div>' +
       '<div class="' + APP_STYLE.className + '">' +
       '<div>' +
       '<button class="' + BUTTON_STYLE.className + '">Hello world!</button>' +
+      '</div>' +
       '</div>' +
       '<style>' + APP_STYLE.selector + '{color:blue;}' + BUTTON_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'

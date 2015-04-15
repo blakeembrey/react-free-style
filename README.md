@@ -5,17 +5,16 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-**React Free Style** was designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and re-rendering `<style />`. This even works with server-side rendering.
+**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and updating `<style />`. This even works with server-side rendering.
 
 ## Why?
 
 Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/free-style#why). This module exposes the API directly to React.js.
 
-**More improvements with React Free Style**
+**Even more improvements with React Free Style**
 
 * Modular React.js components (automatically namespaced CSS)
 * Fast renders with automatic style mounting (output only the styles on page)
-* Create "temporary" styles (register and remove styles with the component lifecycle)
 
 ## Installation
 
@@ -26,31 +25,31 @@ npm install react-free-style --save
 ## Usage
 
 ```js
+// Create a new style instance for the file.
 var Style = require('react-free-style').create()
 
+// Register a simple style.
 var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-var App = Reacte.createClass({
-
-  mixins: [Style.Mixin],
+// Create a new component.
+var App = React.createClass({
 
   render: function () {
     return (
-      <div>
-        <div className={TEXT_STYLE.className}>Hello world!</div>
-        <Style.Element />
-      </div>
+      <div className={TEXT_STYLE.className}>Hello world!</div>
     )
   }
 
 })
 
+// Wrap the component with our higher order component.
+App = Style.component(App)
+
+// Render to the document as usual.
 React.render(React.createElement(App), document.body)
 ```
-
-**Please note:** `<Style.Element />` should be rendered last if you want to support server-side rendering. This is a limitation with React.js because we can not trigger the state updates that are required by the mixin for inline styles.
 
 ### Register Style
 
@@ -73,47 +72,6 @@ Style.registerKeyframes({
   to: { color: 'blue' }
 })
 ```
-
-### Dynamic Styles
-
-Inline (dynamic) styles can be registered using the `registerStyle` and `registerKeyframes` methods on your React component. Any styles registered will follow the React lifecycle and automatically remove when the component is unmounted.
-
-```js
-var Style = require('react-free-style').create()
-
-var BUTTON_STYLE = Style.registerStyle({
-  backgroundColor: 'red',
-  padding: 10
-})
-
-var ButtonComponent = React.createClass({
-
-  mixins: [Style.Mixin],
-
-  componentWillMount: function () {
-    this.inlineStyle = this.registerStyle(this.props.style)
-  },
-
-  render: function () {
-    return <button className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>{this.props.children}</button>
-  }
-
-})
-
-var App = React.createClass({
-
-  mixins: [Style.Mixin],
-
-  render: function () {
-    return <div><ButtonComponent>Hello world!</ButtonComponent><Style.Element /></div>
-  }
-
-})
-
-React.render(React.createElement(App), document.body)
-```
-
-**Please note:** Inline style registration can not occur in the `render` method.
 
 ## License
 
