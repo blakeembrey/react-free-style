@@ -128,8 +128,7 @@ if (module.hot) {
   var freeStyleCache: { [id: string]: ReactFreeStyle } = {}
 
   createFreeStyle = function () {
-    var e: any = new Error()
-    var id = e.stack.split('\n')[2]
+    var id = (<any>new Error()).stack.replace(/Error.*?\r?\n/, '').split('\n')[1]
     var instance = freeStyleCache[id]
 
     if (instance) {
