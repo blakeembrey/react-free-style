@@ -73,6 +73,46 @@ Style.registerKeyframes({
 })
 ```
 
+### Dynamic Styles
+
+Inline (dynamic) styles can be registered using the `registerStyle` and `registerKeyframes` methods on the `freeStyle` context. Any styles registered will follow the React lifecycle and automatically remove when the component is unmounted.
+
+```js
+var Style = require('react-free-style').create()
+
+var BUTTON_STYLE = Style.registerStyle({
+  backgroundColor: 'red',
+  padding: 10
+})
+
+var ButtonComponent = Style.component(React.createClass({
+
+  // You must define `contextTypes` to access `freeStyle`.
+  contextTypes: {
+    freeStyle: React.PropTypes.object.isRequired
+  },
+
+  componentWillMount: function () {
+    this.inlineStyle = this.context.freeStyle.registerStyle(this.props.style)
+  },
+
+  render: function () {
+    return <button className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>{this.props.children}</button>
+  }
+
+}))
+
+var App = Style.component(React.createClass({
+
+  render: function () {
+    return <ButtonComponent>Hello world!</ButtonComponent>
+  }
+
+}))
+
+React.render(React.createElement(App), document.body)
+```
+
 ## License
 
 MIT license

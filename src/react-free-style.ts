@@ -48,17 +48,25 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       },
 
       componentWillMount () {
-        this.rootStyle = this.context.freeStyle || new RootReactFreeStyle(this)
+        this.rootStyle = new RefReactFreeStyle(this.context.freeStyle)
 
         this.rootStyle.attach(freeStyle)
+
+        if (this.context.freeStyle) {
+          this.context.freeStyle.attach(this.rootStyle)
+        }
       },
 
       componentWillUnmount () {
         this.rootStyle.detach(freeStyle)
+
+        if (this.context.freeStyle) {
+          this.context.freeStyle.detach(this.rootStyle)
+        }
       },
 
       render () {
-        if (this.rootStyle.element !== this) {
+        if (this.rootStyle.parent) {
           return React.createElement(Component, this.props)
         }
 
@@ -66,7 +74,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
           'div',
           null,
           React.createElement(Component, this.props),
-          React.createElement(StyleElement, { freeStyle })
+          React.createElement(StyleElement, { style: this.rootStyle })
         )
       }
 
@@ -79,20 +87,16 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 /**
  * Create the <style /> element.
  */
-class StyleElement extends React.Component<{ freeStyle: ReactFreeStyle }, {}> {
-
-  static contextTypes: React.ValidationMap<any> = {
-    freeStyle: React.PropTypes.object
-  }
+class StyleElement extends React.Component<{ style: RefReactFreeStyle }, {}> {
 
   componentWillMount () {
     if (ExecutionEnvironment.canUseDOM) {
-      this.context.freeStyle.addChangeListener(this.onChange)
+      this.props.style.addChangeListener(this.onChange)
     }
   }
 
   componentWillUnmount () {
-    this.context.freeStyle.removeChangeListener(this.onChange)
+    this.props.style.removeChangeListener(this.onChange)
   }
 
   onChange () {
@@ -101,7 +105,7 @@ class StyleElement extends React.Component<{ freeStyle: ReactFreeStyle }, {}> {
 
   render () {
     return React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: this.context.freeStyle.getStyles() }
+      dangerouslySetInnerHTML: { __html: this.props.style.getStyles() }
     })
   }
 
@@ -110,9 +114,9 @@ class StyleElement extends React.Component<{ freeStyle: ReactFreeStyle }, {}> {
 /**
  * Specialized root implementation.
  */
-class RootReactFreeStyle extends ReactFreeStyle {
+class RefReactFreeStyle extends ReactFreeStyle {
 
-  constructor (public element: any) {
+  constructor (public parent?: ReactFreeStyle) {
     super()
   }
 

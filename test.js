@@ -42,12 +42,12 @@ describe('react free style', function () {
 
     var ButtonComponent = React.createClass({
 
-      componentWillMount: function () {
-        inlineStyle = this.inlineStyle = Style.registerStyle(this.props.style)
+      contextTypes: {
+        freeStyle: React.PropTypes.object.isRequired
       },
 
-      componentWillUnmount: function () {
-        Style.remove(this.inlineStyle)
+      componentWillMount: function () {
+        inlineStyle = this.inlineStyle = this.context.freeStyle.registerStyle(this.props.style)
       },
 
       render: function () {
