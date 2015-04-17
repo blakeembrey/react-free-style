@@ -50,18 +50,10 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
         this._rootFreeStyle = this.context.freeStyle || new ReactFreeStyle()
 
         this._rootFreeStyle.attach(freeStyle)
-
-        if (this.context.freeStyle) {
-          this.context.freeStyle.attach(this._rootFreeStyle)
-        }
       },
 
       componentWillUnmount () {
         this._rootFreeStyle.detach(freeStyle)
-
-        if (this.context.freeStyle) {
-          this.context.freeStyle.detach(this._rootFreeStyle)
-        }
       },
 
       render () {
