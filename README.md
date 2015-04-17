@@ -96,6 +96,11 @@ var ButtonComponent = Style.component(React.createClass({
     this.inlineStyle = this.context.freeStyle.registerStyle(this.props.style)
   },
 
+  // Not ideal, but dynamically altering the context caused warnings.
+  componentWillUnmount: function () {
+    this.context.freeStyle.remove(this.inlineStyle)
+  },
+
   render: function () {
     return <button className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>{this.props.children}</button>
   }

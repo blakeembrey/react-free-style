@@ -1,5 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
-
 import React = require('react')
 import FreeStyle = require('free-style')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
@@ -20,7 +18,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
     return super.emitChange(type, style)
   }
 
-  component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
+  component (component: React.ComponentClass<any>): React.ComponentClass<any> {
     /**
      * Keep a reference to the current free style instance.
      */
@@ -29,9 +27,9 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
     /**
      * Create a higher order style component.
      */
-    var ReactStyleElement = React.createClass({
+    return React.createClass({
 
-      displayName: 'Style',
+      displayName: 'FreeStyle',
 
       contextTypes: {
         freeStyle: React.PropTypes.object
@@ -43,81 +41,73 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 
       getChildContext () {
         return {
-          freeStyle: this.rootStyle
+          freeStyle: this._rootFreeStyle
         }
       },
 
       componentWillMount () {
-        this.rootStyle = new RefReactFreeStyle(this.context.freeStyle)
+        this.isRoot = !this.context.freeStyle
+        this._rootFreeStyle = this.context.freeStyle || new ReactFreeStyle()
 
-        this.rootStyle.attach(freeStyle)
+        this._rootFreeStyle.attach(freeStyle)
 
         if (this.context.freeStyle) {
-          this.context.freeStyle.attach(this.rootStyle)
+          this.context.freeStyle.attach(this._rootFreeStyle)
         }
       },
 
       componentWillUnmount () {
-        this.rootStyle.detach(freeStyle)
+        this._rootFreeStyle.detach(freeStyle)
 
         if (this.context.freeStyle) {
-          this.context.freeStyle.detach(this.rootStyle)
+          this.context.freeStyle.detach(this._rootFreeStyle)
         }
       },
 
       render () {
-        if (this.rootStyle.parent) {
-          return React.createElement(Component, this.props)
+        if (!this.isRoot) {
+          return React.createElement(component, this.props)
         }
 
         return React.createElement(
           'div',
           null,
-          React.createElement(Component, this.props),
-          React.createElement(StyleElement, { style: this.rootStyle })
+          React.createElement(component, this.props),
+          React.createElement(StyleElement)
         )
       }
 
     })
-
-    return ReactStyleElement
   }
 }
 
 /**
  * Create the <style /> element.
  */
-class StyleElement extends React.Component<{ style: RefReactFreeStyle }, {}> {
+class StyleElement extends React.Component<{}, {}> {
+
+  onChange = () => this.forceUpdate()
+
+  static displayName = 'Style'
+
+  static contextTypes: React.ValidationMap<any> = {
+    freeStyle: React.PropTypes.object.isRequired
+  }
 
   componentWillMount () {
     if (ExecutionEnvironment.canUseDOM) {
-      this.props.style.addChangeListener(this.onChange)
+      this.context.freeStyle.addChangeListener(this.onChange)
     }
   }
 
   componentWillUnmount () {
-    this.props.style.removeChangeListener(this.onChange)
-  }
-
-  onChange () {
-    this.forceUpdate()
+    this.context.freeStyle.removeChangeListener(this.onChange)
   }
 
   render () {
     return React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: this.props.style.getStyles() }
+      dangerouslySetInnerHTML: { __html: this.context.freeStyle.getStyles() }
     })
-  }
-
-}
-
-/**
- * Specialized root implementation.
- */
-class RefReactFreeStyle extends ReactFreeStyle {
-
-  constructor (public parent?: ReactFreeStyle) {
-    super()
   }
 
 }
