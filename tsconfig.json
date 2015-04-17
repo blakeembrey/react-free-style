@@ -1,18 +1,15 @@
 {
-    "version": "1.4.1",
-    "compilerOptions": {
-        "target": "es5",
-        "outDir": "dist",
-        "module": "commonjs",
-        "declaration": true,
-        "noImplicitAny": true,
-        "removeComments": true,
-        "sourceMap": true
-    },
-    "filesGlob": [
-        "./src/**/*.ts"
-    ],
-    "files": [
-        "./src/react-free-style.ts"
-    ]
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "dist",
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "sourceMap": true
+  },
+  "files": [
+    "src/react-free-style.ts",
+    "typings/tsd.d.ts"
+  ]
 }
