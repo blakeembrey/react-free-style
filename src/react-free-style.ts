@@ -9,6 +9,20 @@ declare var module: any
  * Create a specialized free style instance.
  */
 export class ReactFreeStyle extends FreeStyle.FreeStyle {
+
+  /**
+   * Expose the `StyleElement` for use.
+   *
+   * @type {StyleElement}
+   */
+  Element = StyleElement
+
+  /**
+   * Override emit change to warn when changing styles during render.
+   *
+   * @param {string}              type
+   * @param {FreeStyle.StyleType} style
+   */
   emitChange (type: string, style: FreeStyle.StyleType) {
     if (ReactCurrentOwner.current != null) {
       console.warn('Inline styles must be registered before `render`')
@@ -18,6 +32,12 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
     return super.emitChange(type, style)
   }
 
+  /**
+   * Wrap a React component in a higher order `ReactFreeStyle` component.
+   *
+   * @param  {React.ComponentClass<any>} component
+   * @return {React.ComponentClass<any>}
+   */
   component (component: React.ComponentClass<any>): React.ComponentClass<any> {
     /**
      * Keep a reference to the current free style instance.
@@ -29,7 +49,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
      */
     return React.createClass({
 
-      displayName: 'FreeStyle',
+      displayName: 'ReactFreeStyle',
 
       contextTypes: {
         freeStyle: React.PropTypes.object
@@ -46,9 +66,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       },
 
       componentWillMount () {
-        this.isRoot = !this.context.freeStyle
         this._rootFreeStyle = this.context.freeStyle || new ReactFreeStyle()
-
         this._rootFreeStyle.attach(freeStyle)
       },
 
@@ -57,16 +75,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       },
 
       render () {
-        if (!this.isRoot) {
-          return React.createElement(component, this.props)
-        }
-
-        return React.createElement(
-          'div',
-          null,
-          React.createElement(component, this.props),
-          React.createElement(StyleElement)
-        )
+        return React.createElement(component, this.props)
       }
 
     })
@@ -76,7 +85,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 /**
  * Create the <style /> element.
  */
-class StyleElement extends React.Component<{}, {}> {
+export class StyleElement extends React.Component<{}, {}> {
 
   onChange = () => this.forceUpdate()
 
@@ -93,7 +102,9 @@ class StyleElement extends React.Component<{}, {}> {
   }
 
   componentWillUnmount () {
-    this.context.freeStyle.removeChangeListener(this.onChange)
+    if (ExecutionEnvironment.canUseDOM) {
+      this.context.freeStyle.removeChangeListener(this.onChange)
+    }
   }
 
   render () {
@@ -106,6 +117,7 @@ class StyleElement extends React.Component<{}, {}> {
 
 var createFreeStyle: () => ReactFreeStyle
 
+/* istanbul ignore next */
 if (module.hot) {
   var freeStyleCache: { [id: string]: ReactFreeStyle } = {}
 

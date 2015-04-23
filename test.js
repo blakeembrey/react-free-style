@@ -18,15 +18,21 @@ describe('react free style', function () {
 
     var App = Style.component(React.createClass({
 
+      displayName: 'App',
+
       render: function () {
-        return React.createElement('div', { className: TEXT_STYLE.className }, 'Hello world!')
+        return React.createElement(
+          'div',
+          { className: TEXT_STYLE.className },
+          'Hello world!',
+          React.createElement(Style.Element)
+        )
       }
 
     }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div>' +
-      '<div class="' + TEXT_STYLE.className + '">Hello world!</div>' +
+      '<div class="' + TEXT_STYLE.className + '">Hello world!' +
       '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
     )
@@ -66,9 +72,14 @@ describe('react free style', function () {
 
       render: function () {
         return React.createElement(
-          ButtonComponent,
-          { style: { color: 'blue'} },
-          'Hello world!'
+          'div',
+          null,
+          React.createElement(
+            ButtonComponent,
+            { style: { color: 'blue'} },
+            'Hello world!'
+          ),
+          React.createElement(Style.Element)
         )
       }
 
@@ -125,18 +136,17 @@ describe('react free style', function () {
         return React.createElement(
           'div',
           { className: APP_STYLE.className },
-          React.createElement(Child)
+          React.createElement(Child),
+          React.createElement(Style.Element)
         )
       }
 
     }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div>' +
       '<div class="' + APP_STYLE.className + '">' +
       '<div>' +
       '<button class="' + BUTTON_STYLE.className + '">Hello world!</button>' +
-      '</div>' +
       '</div>' +
       '<style>' + APP_STYLE.selector + '{color:blue;}' + BUTTON_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
