@@ -14,7 +14,8 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 **Even more improvements with React Free Style**
 
 * Modular React.js components (automatically namespaced CSS)
-* Fast renders with automatic style mounting (output only the styles on page)
+* Fast renders with automatic style mounting (outputs only the styles on page)
+* Supports isomorphic applications
 
 ## Installation
 
@@ -25,31 +26,37 @@ npm install react-free-style --save
 ## Usage
 
 ```js
-// Create a new style instance for the file.
+// Create a style instance for the component.
 var Style = require('react-free-style').create()
 
-// Register a simple style.
+// Register some styles.
 var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-// Create a new component.
+// Create a React component.
 var App = React.createClass({
 
   render: function () {
     return (
-      <div className={TEXT_STYLE.className}>Hello world!</div>
+      <div className={TEXT_STYLE.className}>
+        Hello world!
+
+        <Style.Element />
+      </div>
     )
   }
 
 })
 
-// Wrap the component with our higher order component.
+// Wrap the component with a higher order component.
 App = Style.component(App)
 
-// Render to the document as usual.
-React.render(React.createElement(App), document.body)
+// Render to the document.
+React.render(<App />, document.body)
 ```
+
+**Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
 
 ### Register Style
 
@@ -68,8 +75,12 @@ Register a [name spaced keyframes](https://github.com/blakeembrey/free-style#key
 
 ```js
 Style.registerKeyframes({
-  from: { color: 'red' },
-  to: { color: 'blue' }
+  from: {
+    color: 'red'
+  },
+  to: {
+    color: 'blue'
+  }
 })
 ```
 
@@ -96,13 +107,17 @@ var ButtonComponent = Style.component(React.createClass({
     this.inlineStyle = this.context.freeStyle.registerStyle(this.props.style)
   },
 
-  // Not ideal, but dynamically altering the context caused warnings.
   componentWillUnmount: function () {
     this.context.freeStyle.remove(this.inlineStyle)
   },
 
   render: function () {
-    return <button className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>{this.props.children}</button>
+    return (
+      <button
+        className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>
+        {this.props.children}
+      </button>
+    )
   }
 
 }))
@@ -110,12 +125,18 @@ var ButtonComponent = Style.component(React.createClass({
 var App = Style.component(React.createClass({
 
   render: function () {
-    return <ButtonComponent>Hello world!</ButtonComponent>
+    return (
+      <div>
+        <ButtonComponent>Hello world!</ButtonComponent>
+
+        <Style.Element />
+      </div>
+    )
   }
 
 }))
 
-React.render(React.createElement(App), document.body)
+React.render(<App />, document.body)
 ```
 
 ## License

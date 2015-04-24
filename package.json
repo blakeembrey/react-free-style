@@ -13,8 +13,8 @@
     "lint": "# TODO",
     "build": "npm run build-ts",
     "build-ts": "tsc",
-    "test-spec": "mocha -R spec --bail",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- dist/**/*.spec.js -R spec --bail",
     "test": "npm run build && npm run lint && npm run test-cov",
     "prepublish": "npm run build"
   },
@@ -40,7 +40,7 @@
   "homepage": "https://github.com/blakeembrey/react-free-style",
   "devDependencies": {
     "chai": "^2.1.1",
-    "istanbul": "^0.3.5",
+    "istanbul": "^0.3.13",
     "mocha": "^2.1.0",
     "pre-commit": "^1.0.6",
     "typescript": "^1.5.0-alpha"

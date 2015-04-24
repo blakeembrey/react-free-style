@@ -1,14 +1,14 @@
 /* global describe, it, beforeEach */
 
-var expect = require('chai').expect
-var React = require('react')
-var ReactFreeStyle = require('./')
+import { expect } from 'chai'
+import * as React from 'react'
+import { create, ReactFreeStyle, FreeStyle } from './react-free-style'
 
 describe('react free style', function () {
-  var Style
+  var Style: ReactFreeStyle
 
   beforeEach(function () {
-    Style = ReactFreeStyle.create()
+    Style = create()
   })
 
   it('should render the main example', function () {
@@ -18,22 +18,29 @@ describe('react free style', function () {
 
     var App = Style.component(React.createClass({
 
+      displayName: 'App',
+
       render: function () {
-        return React.createElement('div', { className: TEXT_STYLE.className }, 'Hello world!')
+        return React.createElement(
+          'div',
+          { className: TEXT_STYLE.className },
+          'Hello world!',
+          React.createElement(Style.Element)
+        )
       }
 
     }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div>' +
-      '<div class="' + TEXT_STYLE.className + '">Hello world!</div>' +
+      '<div class="' + TEXT_STYLE.className + '">' +
+      'Hello world!' +
       '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
     )
   })
 
   it('should render the example dynamic styles', function () {
-    var inlineStyle
+    var inlineStyle: FreeStyle.Style
 
     var BUTTON_STYLE = Style.registerStyle({
       backgroundColor: 'red',
@@ -66,9 +73,14 @@ describe('react free style', function () {
 
       render: function () {
         return React.createElement(
-          ButtonComponent,
-          { style: { color: 'blue'} },
-          'Hello world!'
+          'div',
+          null,
+          React.createElement(
+            ButtonComponent,
+            { style: { color: 'blue'} },
+            'Hello world!'
+          ),
+          React.createElement(Style.Element)
         )
       }
 
@@ -83,7 +95,7 @@ describe('react free style', function () {
   })
 
   it('should work with children', function () {
-    var ChildStyle = ReactFreeStyle.create()
+    var ChildStyle = create()
 
     var APP_STYLE = Style.registerStyle({
       color: 'blue'
@@ -119,24 +131,21 @@ describe('react free style', function () {
 
     var App = Style.component(React.createClass({
 
-      mixins: [Style.Mixin],
-
       render: function () {
         return React.createElement(
           'div',
           { className: APP_STYLE.className },
-          React.createElement(Child)
+          React.createElement(Child),
+          React.createElement(Style.Element)
         )
       }
 
     }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div>' +
       '<div class="' + APP_STYLE.className + '">' +
       '<div>' +
       '<button class="' + BUTTON_STYLE.className + '">Hello world!</button>' +
-      '</div>' +
       '</div>' +
       '<style>' + APP_STYLE.selector + '{color:blue;}' + BUTTON_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
