@@ -15,7 +15,7 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 
 * Modular React.js components (automatically namespaced CSS)
 * Fast renders with automatic style mounting (outputs only the styles on page)
-* Supports isomorphic applications
+* Supports isomorphic applications by default
 
 ## Installation
 
