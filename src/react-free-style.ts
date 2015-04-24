@@ -38,16 +38,16 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
    * @param  {React.ComponentClass<any>} component
    * @return {React.ComponentClass<any>}
    */
-  component (component: React.ComponentClass<any>): React.ComponentClass<any> {
+  component (component: React.ComponentClass<any>): React.ClassicComponentClass<{}> {
     /**
-     * Keep a reference to the current free style instance.
+     * Alias `free-style` instance for changes.
      */
     var freeStyle = this
 
     /**
      * Create a higher order style component.
      */
-    return React.createClass({
+    var ReactFreeStyleComponent = React.createClass({
 
       displayName: 'ReactFreeStyle',
 
@@ -65,13 +65,27 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
         }
       },
 
+      getInitialState () {
+        return { freeStyle }
+      },
+
+      componentWillUpdate () {
+        // Hook into component updates to keep styles in sync over hot code
+        // reloads. This works great with React Hot Loader!
+        if (module.hot && this.state.freeStyle.id !== freeStyle.id) {
+          this._parentFreeStyle.attach(freeStyle)
+          this._parentFreeStyle.detach(this.state.freeStyle)
+          this.state.freeStyle = freeStyle
+        }
+      },
+
       componentWillMount () {
         this._parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
-        this._parentFreeStyle.attach(freeStyle)
+        this._parentFreeStyle.attach(this.state.freeStyle)
       },
 
       componentWillUnmount () {
-        this._parentFreeStyle.detach(freeStyle)
+        this._parentFreeStyle.detach(this.state.freeStyle)
       },
 
       render () {
@@ -79,6 +93,8 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       }
 
     })
+
+    return ReactFreeStyleComponent
   }
 
 }
@@ -116,28 +132,6 @@ export class StyleElement extends React.Component<{}, {}> {
 
 }
 
-var createFreeStyle: () => ReactFreeStyle
-
-/* istanbul ignore next */
-if (module.hot) {
-  var freeStyleCache: { [id: string]: ReactFreeStyle } = {}
-
-  createFreeStyle = function () {
-    var id = (<any>new Error()).stack.replace(/Error.*?\r?\n/, '').split('\n')[1]
-    var instance = freeStyleCache[id]
-
-    if (instance) {
-      instance.empty()
-
-      return instance
-    }
-
-    return (freeStyleCache[id] = new ReactFreeStyle())
-  }
-} else {
-  createFreeStyle = function () {
-    return new ReactFreeStyle()
-  }
+export function create () {
+  return new ReactFreeStyle()
 }
-
-export var create = createFreeStyle
