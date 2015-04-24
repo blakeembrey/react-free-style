@@ -1,7 +1,7 @@
 import React = require('react')
-import FreeStyle = require('free-style')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
 import ExecutionEnvironment = require('react/lib/ExecutionEnvironment')
+export import FreeStyle = require('free-style')
 
 declare var module: any
 
@@ -61,17 +61,17 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 
       getChildContext () {
         return {
-          freeStyle: this._rootFreeStyle
+          freeStyle: this._parentFreeStyle
         }
       },
 
       componentWillMount () {
-        this._rootFreeStyle = this.context.freeStyle || new ReactFreeStyle()
-        this._rootFreeStyle.attach(freeStyle)
+        this._parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
+        this._parentFreeStyle.attach(freeStyle)
       },
 
       componentWillUnmount () {
-        this._rootFreeStyle.detach(freeStyle)
+        this._parentFreeStyle.detach(freeStyle)
       },
 
       render () {
@@ -80,6 +80,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 
     })
   }
+
 }
 
 /**
@@ -87,13 +88,13 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
  */
 export class StyleElement extends React.Component<{}, {}> {
 
-  onChange = () => this.forceUpdate()
-
   static displayName = 'Style'
 
   static contextTypes: React.ValidationMap<any> = {
     freeStyle: React.PropTypes.object.isRequired
   }
+
+  onChange = () => this.forceUpdate()
 
   componentWillMount () {
     if (ExecutionEnvironment.canUseDOM) {

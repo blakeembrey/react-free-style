@@ -10,6 +10,7 @@
   },
   "files": [
     "src/react-free-style.ts",
+    "src/react-free-style.spec.ts",
     "typings/tsd.d.ts"
   ]
 }

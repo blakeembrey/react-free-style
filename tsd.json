@@ -7,6 +7,12 @@
   "installed": {
     "react/react.d.ts": {
       "commit": "a834d5f001fb96998a6587343ecccf45fdfbcb6d"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "575d70adcad0086ec8c6f672a5eb569a4689486c"
+    },
+    "chai/chai.d.ts": {
+      "commit": "575d70adcad0086ec8c6f672a5eb569a4689486c"
     }
   }
 }

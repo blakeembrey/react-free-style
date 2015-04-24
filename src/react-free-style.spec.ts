@@ -1,14 +1,14 @@
 /* global describe, it, beforeEach */
 
-var expect = require('chai').expect
-var React = require('react')
-var ReactFreeStyle = require('./')
+import { expect } from 'chai'
+import * as React from 'react'
+import { create, ReactFreeStyle, FreeStyle } from './react-free-style'
 
 describe('react free style', function () {
-  var Style
+  var Style: ReactFreeStyle
 
   beforeEach(function () {
-    Style = ReactFreeStyle.create()
+    Style = create()
   })
 
   it('should render the main example', function () {
@@ -32,14 +32,15 @@ describe('react free style', function () {
     }))
 
     expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + TEXT_STYLE.className + '">Hello world!' +
+      '<div class="' + TEXT_STYLE.className + '">' +
+      'Hello world!' +
       '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
     )
   })
 
   it('should render the example dynamic styles', function () {
-    var inlineStyle
+    var inlineStyle: FreeStyle.Style
 
     var BUTTON_STYLE = Style.registerStyle({
       backgroundColor: 'red',
@@ -94,7 +95,7 @@ describe('react free style', function () {
   })
 
   it('should work with children', function () {
-    var ChildStyle = ReactFreeStyle.create()
+    var ChildStyle = create()
 
     var APP_STYLE = Style.registerStyle({
       color: 'blue'
@@ -129,8 +130,6 @@ describe('react free style', function () {
     }))
 
     var App = Style.component(React.createClass({
-
-      mixins: [Style.Mixin],
 
       render: function () {
         return React.createElement(

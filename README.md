@@ -14,7 +14,8 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 **Even more improvements with React Free Style**
 
 * Modular React.js components (automatically namespaced CSS)
-* Fast renders with automatic style mounting (output only the styles on page)
+* Fast renders with automatic style mounting (outputs only the styles on page)
+* Supports isomorphic applications
 
 ## Installation
 
@@ -55,7 +56,7 @@ App = Style.component(App)
 React.render(<App />, document.body)
 ```
 
-**Note:** You must render `Style.Element` at the root level of your application. I recommend rendering it last so it receives all styles on the first render (required for isomorphic applications).
+**Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
 
 ### Register Style
 
