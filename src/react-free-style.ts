@@ -44,6 +44,10 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
      */
     const freeStyle = this
     const proto = Component.prototype
+    
+    function runMethod (thisArg: ReactFreeStyleComponent, methodName: string, args: IArguments) {
+      return (proto[methodName] || noop).apply(thisArg, Array.prototype.slice.apply(args))
+    }
 
     class ReactFreeStyleComponent extends Component {
       context: any
@@ -59,7 +63,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       })
 
       getChildContext () {
-        return extend((proto.componentWillUpdate || noop).call(this), {
+        return extend(runMethod(this, 'getChildContext', arguments), {
           freeStyle: this._parentFreeStyle
         })
       }
@@ -73,19 +77,19 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
           this._freeStyle = freeStyle
         }
 
-        ;(proto.componentWillUpdate || noop).call(this)
+        runMethod(this, 'componentWillUpdate', arguments)
       }
 
       componentWillMount () {
         this._parentFreeStyle.attach(this._freeStyle)
 
-        ;(proto.componentWillMount || noop).call(this)
+        runMethod(this, 'componentWillMount', arguments)
       }
 
       componentWillUnmount () {
         this._parentFreeStyle.detach(this._freeStyle)
 
-        ;(proto.componentWillUnmount || noop).call(this)
+        runMethod(this, 'componentWillUnmount', arguments)
       }
     }
 
