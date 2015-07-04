@@ -1,9 +1,9 @@
 import React = require('react')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
-import ExecutionEnvironment = require('react/lib/ExecutionEnvironment')
+import extend = require('xtend')
 export import FreeStyle = require('free-style')
 
-declare var module: any
+declare const module: any
 
 /**
  * Create a specialized free style instance.
@@ -12,8 +12,6 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 
   /**
    * Expose the `StyleElement` for use.
-   *
-   * @type {StyleElement}
    */
   Element = StyleElement
 
@@ -33,66 +31,66 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   }
 
   /**
-   * Wrap a React component in a higher order `ReactFreeStyle` component.
-   *
-   * @param  {React.ComponentClass<any>} component
-   * @return {React.ComponentClass<any>}
+   * Create a React component that inherits from a user component. This is
+   * required for methods on the user component to continue working once
+   * wrapped with the style functionality.
    */
-  component (component: React.ComponentClass<any>): React.ClassicComponentClass<{}> {
+  component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
     /**
      * Alias `free-style` instance for changes.
      */
-    var freeStyle = this
+    const freeStyle = this
+    const proto = Component.prototype
 
-    /**
-     * Create a higher order style component.
-     */
-    var ReactFreeStyleComponent = React.createClass({
+    class ReactFreeStyleComponent extends Component {
+      context: any
+      _freeStyle = freeStyle
+      _parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
 
-      displayName: 'ReactFreeStyle',
+      // Make sure debugging with React looks the same.
+      static displayName = (<any> Component).displayName || (<any> Component).name
 
-      contextTypes: {
+      static contextTypes = extend(Component.contextTypes, {
         freeStyle: React.PropTypes.object
-      },
+      })
 
-      childContextTypes: {
+      static childContextTypes = extend(Component.childContextTypes, {
         freeStyle: React.PropTypes.object.isRequired
-      },
+      })
 
       getChildContext () {
-        return {
+        return extend((proto.getChildContext || noop).call(this), {
           freeStyle: this._parentFreeStyle
-        }
-      },
-
-      getInitialState () {
-        return { freeStyle }
-      },
+        })
+      }
 
       componentWillUpdate () {
         // Hook into component updates to keep styles in sync over hot code
         // reloads. This works great with React Hot Loader!
-        if (module.hot && this.state.freeStyle.id !== freeStyle.id) {
+        if (module.hot && this._freeStyle.id !== freeStyle.id) {
+          this._parentFreeStyle.detach(this._freeStyle)
           this._parentFreeStyle.attach(freeStyle)
-          this._parentFreeStyle.detach(this.state.freeStyle)
-          this.state.freeStyle = freeStyle
+          this._freeStyle = freeStyle
         }
-      },
 
-      componentWillMount () {
-        this._parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
-        this._parentFreeStyle.attach(this.state.freeStyle)
-      },
-
-      componentWillUnmount () {
-        this._parentFreeStyle.detach(this.state.freeStyle)
-      },
-
-      render () {
-        return React.createElement(component, this.props)
+        ;(proto.componentWillUpdate || noop).apply(this, arguments)
       }
 
-    })
+      componentWillMount () {
+        this._parentFreeStyle.attach(this._freeStyle)
+
+        ;(proto.componentWillMount || noop).call(this)
+      }
+
+      componentWillUnmount () {
+        this._parentFreeStyle.detach(this._freeStyle)
+
+        ;(proto.componentWillUnmount || noop).call(this)
+      }
+    }
+
+    // Alias `render` to the prototype for React Hot Loader to pick up changes.
+    ;(<any> ReactFreeStyleComponent).prototype.render = proto.render
 
     return ReactFreeStyleComponent
   }
@@ -113,15 +111,11 @@ export class StyleElement extends React.Component<{}, {}> {
   onChange = () => this.forceUpdate()
 
   componentWillMount () {
-    if (ExecutionEnvironment.canUseDOM) {
-      this.context.freeStyle.addChangeListener(this.onChange)
-    }
+    this.context.freeStyle.addChangeListener(this.onChange)
   }
 
   componentWillUnmount () {
-    if (ExecutionEnvironment.canUseDOM) {
-      this.context.freeStyle.removeChangeListener(this.onChange)
-    }
+    this.context.freeStyle.removeChangeListener(this.onChange)
   }
 
   render () {
@@ -132,6 +126,23 @@ export class StyleElement extends React.Component<{}, {}> {
 
 }
 
+/**
+ * Create a React Free Style instance.
+ */
 export function create () {
   return new ReactFreeStyle()
 }
+
+/**
+ * Accept a style instance for use with decorators.
+ */
+export function injectStyle (Style: ReactFreeStyle) {
+  return function <T> (Component: T): T {
+    return <any> Style.component(<any> Component)
+  }
+}
+
+/**
+ * Noop.
+ */
+function noop () {}

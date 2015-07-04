@@ -49,7 +49,7 @@ var App = React.createClass({
 
 })
 
-// Wrap the component with a higher order component.
+// Extend `App` to create a new class with style injection.
 App = Style.component(App)
 
 // Render to the document.
@@ -57,6 +57,35 @@ React.render(<App />, document.body)
 ```
 
 **Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
+
+### With ES6/7
+
+```js
+import { create, injectStyle } from 'react-free-style'
+
+const Style = create()
+
+const TEXT_STYLE = Style.registerStyle({
+  backgroundColor: 'red'
+})
+
+@injectStyle(Style)
+class App extends React.Component {
+
+  render () {
+    return (
+      <div className={TEXT_STYLE.className}>
+        Hello world!
+
+        <Style.Element />
+      </div>
+    )
+  }
+
+}
+
+React.render(<App />, document.body)
+```
 
 ### Register Style
 
