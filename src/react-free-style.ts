@@ -1,9 +1,9 @@
 import React = require('react')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
-import ExecutionEnvironment = require('react/lib/ExecutionEnvironment')
+import extend = require('xtend')
 export import FreeStyle = require('free-style')
 
-declare var module: any
+declare const module: any
 
 /**
  * Create a specialized free style instance.
@@ -38,61 +38,59 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
    * @param  {React.ComponentClass<any>} component
    * @return {React.ComponentClass<any>}
    */
-  component (component: React.ComponentClass<any>): React.ClassicComponentClass<{}> {
+  component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
     /**
      * Alias `free-style` instance for changes.
      */
-    var freeStyle = this
+    const freeStyle = this
+    const proto = Component.prototype
 
-    /**
-     * Create a higher order style component.
-     */
-    var ReactFreeStyleComponent = React.createClass({
+    class ReactFreeStyleComponent extends Component {
+      context: any
+      _freeStyle = freeStyle
+      _parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
 
-      displayName: 'ReactFreeStyle',
-
-      contextTypes: {
+      static contextTypes = extend(Component.contextTypes, {
         freeStyle: React.PropTypes.object
-      },
+      })
 
-      childContextTypes: {
+      static childContextTypes = extend(Component.childContextTypes, {
         freeStyle: React.PropTypes.object.isRequired
-      },
+      })
 
       getChildContext () {
-        return {
+        return extend((proto.componentWillUpdate || noop).call(this), {
           freeStyle: this._parentFreeStyle
-        }
-      },
-
-      getInitialState () {
-        return { freeStyle }
-      },
+        })
+      }
 
       componentWillUpdate () {
         // Hook into component updates to keep styles in sync over hot code
         // reloads. This works great with React Hot Loader!
-        if (module.hot && this.state.freeStyle.id !== freeStyle.id) {
+        if (module.hot && this._freeStyle.id !== freeStyle.id) {
+          this._parentFreeStyle.detach(this._freeStyle)
           this._parentFreeStyle.attach(freeStyle)
-          this._parentFreeStyle.detach(this.state.freeStyle)
-          this.state.freeStyle = freeStyle
+          this._freeStyle = freeStyle
         }
-      },
 
-      componentWillMount () {
-        this._parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
-        this._parentFreeStyle.attach(this.state.freeStyle)
-      },
-
-      componentWillUnmount () {
-        this._parentFreeStyle.detach(this.state.freeStyle)
-      },
-
-      render () {
-        return React.createElement(component, this.props)
+        ;(proto.componentWillUpdate || noop).call(this)
       }
 
-    })
+      componentWillMount () {
+        this._parentFreeStyle.attach(this._freeStyle)
+
+        ;(proto.componentWillMount || noop).call(this)
+      }
+
+      componentWillUnmount () {
+        this._parentFreeStyle.detach(this._freeStyle)
+
+        ;(proto.componentWillUnmount || noop).call(this)
+      }
+    }
+
+    // Alias `render` to the prototype for React Hot Loader to pick up changes.
+    ;(<any> ReactFreeStyleComponent).prototype.render = proto.render
 
     return ReactFreeStyleComponent
   }
@@ -113,15 +111,11 @@ export class StyleElement extends React.Component<{}, {}> {
   onChange = () => this.forceUpdate()
 
   componentWillMount () {
-    if (ExecutionEnvironment.canUseDOM) {
-      this.context.freeStyle.addChangeListener(this.onChange)
-    }
+    this.context.freeStyle.addChangeListener(this.onChange)
   }
 
   componentWillUnmount () {
-    if (ExecutionEnvironment.canUseDOM) {
-      this.context.freeStyle.removeChangeListener(this.onChange)
-    }
+    this.context.freeStyle.removeChangeListener(this.onChange)
   }
 
   render () {
@@ -132,6 +126,14 @@ export class StyleElement extends React.Component<{}, {}> {
 
 }
 
+/**
+ * Create a React Free Style instance.
+ */
 export function create () {
   return new ReactFreeStyle()
 }
+
+/**
+ * Noop.
+ */
+function noop () {}
