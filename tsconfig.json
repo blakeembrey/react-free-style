@@ -6,7 +6,8 @@
     "declaration": true,
     "noImplicitAny": true,
     "removeComments": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "experimentalDecorators": true
   },
   "files": [
     "src/react-free-style.ts",

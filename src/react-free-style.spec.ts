@@ -2,21 +2,21 @@
 
 import { expect } from 'chai'
 import * as React from 'react'
-import { create, ReactFreeStyle, FreeStyle } from './react-free-style'
+import { create, ReactFreeStyle, FreeStyle, injectStyle } from './react-free-style'
 
 describe('react free style', function () {
-  var Style: ReactFreeStyle
+  let Style: ReactFreeStyle
 
   beforeEach(function () {
     Style = create()
   })
 
   it('should render the main example', function () {
-    var TEXT_STYLE = Style.registerStyle({
+    const TEXT_STYLE = Style.registerStyle({
       backgroundColor: 'red'
     })
 
-    var App = Style.component(React.createClass({
+    const App = Style.component(React.createClass({
 
       displayName: 'App',
 
@@ -40,14 +40,14 @@ describe('react free style', function () {
   })
 
   it('should render the example dynamic styles', function () {
-    var inlineStyle: FreeStyle.Style
+    let inlineStyle: FreeStyle.Style
 
-    var BUTTON_STYLE = Style.registerStyle({
+    const BUTTON_STYLE = Style.registerStyle({
       backgroundColor: 'red',
       padding: 10
     })
 
-    var ButtonComponent = React.createClass({
+    const ButtonComponent = React.createClass({
 
       contextTypes: {
         freeStyle: React.PropTypes.object.isRequired
@@ -69,7 +69,7 @@ describe('react free style', function () {
 
     })
 
-    var App = Style.component(React.createClass({
+    const App = Style.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -95,17 +95,17 @@ describe('react free style', function () {
   })
 
   it('should work with children', function () {
-    var ChildStyle = create()
+    const ChildStyle = create()
 
-    var APP_STYLE = Style.registerStyle({
+    const APP_STYLE = Style.registerStyle({
       color: 'blue'
     })
 
-    var BUTTON_STYLE = ChildStyle.registerStyle({
+    const BUTTON_STYLE = ChildStyle.registerStyle({
       backgroundColor: 'red'
     })
 
-    var Button = ChildStyle.component(React.createClass({
+    const Button = ChildStyle.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -117,7 +117,7 @@ describe('react free style', function () {
 
     }))
 
-    var Child = ChildStyle.component(React.createClass({
+    const Child = ChildStyle.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -129,7 +129,7 @@ describe('react free style', function () {
 
     }))
 
-    var App = Style.component(React.createClass({
+    const App = Style.component(React.createClass({
 
       render: function () {
         return React.createElement(
@@ -148,6 +148,35 @@ describe('react free style', function () {
       '<button class="' + BUTTON_STYLE.className + '">Hello world!</button>' +
       '</div>' +
       '<style>' + APP_STYLE.selector + '{color:blue;}' + BUTTON_STYLE.selector + '{background-color:red;}</style>' +
+      '</div>'
+    )
+  })
+
+  it('should set display name to the component name', function () {
+    const TEXT_STYLE = Style.registerStyle({
+      backgroundColor: 'red'
+    })
+
+    @injectStyle(Style)
+    class App extends React.Component<{}, {}> {
+
+      render () {
+        return React.createElement(
+          'div',
+          { className: TEXT_STYLE.className },
+          'Hello world!',
+          React.createElement(Style.Element)
+        )
+      }
+
+    }
+
+    expect((<any> App).displayName).to.equal('App')
+
+    expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div class="' + TEXT_STYLE.className + '">' +
+      'Hello world!' +
+      '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
       '</div>'
     )
   })

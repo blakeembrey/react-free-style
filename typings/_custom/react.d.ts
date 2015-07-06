@@ -9,11 +9,3 @@ declare module 'react/lib/ReactCurrentOwner' {
 
   export = ReactCurrentOwner
 }
-
-declare module 'react/lib/ExecutionEnvironment' {
-  var ExecutionEnvironment: {
-    canUseDOM: boolean
-  }
-
-  export = ExecutionEnvironment
-}
