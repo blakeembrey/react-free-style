@@ -43,7 +43,8 @@
     "istanbul": "^0.3.13",
     "mocha": "^2.1.0",
     "ntypescript": "^1.201508100803.1",
-    "pre-commit": "^1.0.6"
+    "pre-commit": "^1.0.6",
+    "react": "^0.13.3"
   },
   "dependencies": {
     "free-style": "^0.5.4",
