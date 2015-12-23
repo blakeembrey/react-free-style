@@ -1,5 +1,3 @@
-/// <reference path="../react/react.d.ts" />
-
 declare module 'react/lib/ReactCurrentOwner' {
   import React = require('react')
 

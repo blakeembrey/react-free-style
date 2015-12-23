@@ -2,6 +2,7 @@
 
 import { expect } from 'chai'
 import * as React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { create, ReactFreeStyle, FreeStyle, injectStyle } from './react-free-style'
 
 describe('react free style', function () {
@@ -23,7 +24,7 @@ describe('react free style', function () {
       render: function () {
         return React.createElement(
           'div',
-          { className: TEXT_STYLE.className },
+          { className: TEXT_STYLE },
           'Hello world!',
           React.createElement(Style.Element)
         )
@@ -31,10 +32,10 @@ describe('react free style', function () {
 
     }))
 
-    expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + TEXT_STYLE.className + '">' +
+    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div class="' + TEXT_STYLE + '">' +
       'Hello world!' +
-      '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
+      '<style>.' + TEXT_STYLE + '{background-color:red}</style>' +
       '</div>'
     )
   })
@@ -47,7 +48,7 @@ describe('react free style', function () {
       padding: 10
     })
 
-    const ButtonComponent = React.createClass({
+    const ButtonComponent = React.createClass<{ style: any }, {}>({
 
       contextTypes: {
         freeStyle: React.PropTypes.object.isRequired
@@ -61,7 +62,7 @@ describe('react free style', function () {
         return React.createElement(
           'button',
           {
-            className: Style.join(this.inlineStyle.className, BUTTON_STYLE.className)
+            className: Style.join(this.inlineStyle, BUTTON_STYLE)
           },
           this.props.children
         )
@@ -86,10 +87,10 @@ describe('react free style', function () {
 
     }))
 
-    expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
+    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div>' +
-      '<button class="' + inlineStyle.className + ' ' + BUTTON_STYLE.className + '">Hello world!</button>' +
-      '<style>' + BUTTON_STYLE.selector + '{background-color:red;padding:10px;}' + inlineStyle.selector + '{color:blue;}</style>' +
+      '<button class="' + inlineStyle + ' ' + BUTTON_STYLE + '">Hello world!</button>' +
+      '<style>.' + BUTTON_STYLE + '{background-color:red;padding:10px}.' + inlineStyle + '{color:blue}</style>' +
       '</div>'
     )
   })
@@ -110,7 +111,7 @@ describe('react free style', function () {
       render: function () {
         return React.createElement(
           'button',
-          { className: BUTTON_STYLE.className },
+          { className: BUTTON_STYLE },
           'Hello world!'
         )
       }
@@ -134,7 +135,7 @@ describe('react free style', function () {
       render: function () {
         return React.createElement(
           'div',
-          { className: APP_STYLE.className },
+          { className: APP_STYLE },
           React.createElement(Child),
           React.createElement(Style.Element)
         )
@@ -142,12 +143,12 @@ describe('react free style', function () {
 
     }))
 
-    expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + APP_STYLE.className + '">' +
+    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div class="' + APP_STYLE + '">' +
       '<div>' +
-      '<button class="' + BUTTON_STYLE.className + '">Hello world!</button>' +
+      '<button class="' + BUTTON_STYLE + '">Hello world!</button>' +
       '</div>' +
-      '<style>' + APP_STYLE.selector + '{color:blue;}' + BUTTON_STYLE.selector + '{background-color:red;}</style>' +
+      '<style>.' + APP_STYLE + '{color:blue}.' + BUTTON_STYLE + '{background-color:red}</style>' +
       '</div>'
     )
   })
@@ -163,7 +164,7 @@ describe('react free style', function () {
       render () {
         return React.createElement(
           'div',
-          { className: TEXT_STYLE.className },
+          { className: TEXT_STYLE },
           'Hello world!',
           React.createElement(Style.Element)
         )
@@ -173,10 +174,10 @@ describe('react free style', function () {
 
     expect((<any> App).displayName).to.equal('App')
 
-    expect(React.renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + TEXT_STYLE.className + '">' +
+    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div class="' + TEXT_STYLE + '">' +
       'Hello world!' +
-      '<style>' + TEXT_STYLE.selector + '{background-color:red;}</style>' +
+      '<style>.' + TEXT_STYLE + '{background-color:red}</style>' +
       '</div>'
     )
   })

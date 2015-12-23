@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and updating `<style />`. This works even better with server-side rendering, only the styles on the current page will ever be rendered up front.
+**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and updating the `<style />` component. This works even better with server-side rendering, as only the styles on the current page will be sent to clients.
 
 ## Why?
 
@@ -39,7 +39,7 @@ var App = React.createClass({
 
   render: function () {
     return (
-      <div className={TEXT_STYLE.className}>
+      <div className={TEXT_STYLE}>
         Hello world!
 
         <Style.Element />
@@ -58,7 +58,7 @@ React.render(<App />, document.body)
 
 **Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
 
-### With ES6/7
+### With ES6 Modules and Decorators
 
 ```js
 import { create, injectStyle } from 'react-free-style'
@@ -74,7 +74,7 @@ class App extends React.Component {
 
   render () {
     return (
-      <div className={TEXT_STYLE.className}>
+      <div className={TEXT_STYLE}>
         Hello world!
 
         <Style.Element />
@@ -111,61 +111,6 @@ Style.registerKeyframes({
     color: 'blue'
   }
 })
-```
-
-### Dynamic Styles
-
-Inline (dynamic) styles can be registered using the `registerStyle` and `registerKeyframes` methods on the `freeStyle` context. Any styles registered will follow the React lifecycle and automatically remove when the component is unmounted.
-
-```js
-var Style = require('react-free-style').create()
-
-var BUTTON_STYLE = Style.registerStyle({
-  backgroundColor: 'red',
-  padding: 10
-})
-
-var ButtonComponent = Style.component(React.createClass({
-
-  // You must define `contextTypes` to access `freeStyle`.
-  contextTypes: {
-    freeStyle: React.PropTypes.object.isRequired
-  },
-
-  componentWillMount: function () {
-    this.inlineStyle = this.context.freeStyle.registerStyle(this.props.style)
-  },
-
-  componentWillUnmount: function () {
-    this.context.freeStyle.remove(this.inlineStyle)
-  },
-
-  render: function () {
-    return (
-      <button
-        className={Style.join(this.inlineStyle.className, BUTTON_STYLE.className)}>
-        {this.props.children}
-      </button>
-    )
-  }
-
-}))
-
-var App = Style.component(React.createClass({
-
-  render: function () {
-    return (
-      <div>
-        <ButtonComponent>Hello world!</ButtonComponent>
-
-        <Style.Element />
-      </div>
-    )
-  }
-
-}))
-
-React.render(<App />, document.body)
 ```
 
 ## License

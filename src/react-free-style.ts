@@ -17,17 +17,14 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
 
   /**
    * Override emit change to warn when changing styles during render.
-   *
-   * @param {string}              type
-   * @param {FreeStyle.StyleType} style
    */
-  emitChange (type: string, style: FreeStyle.StyleType) {
+  emitChange (type: string, path: any) {
     if (ReactCurrentOwner.current != null) {
       console.warn('Inline styles must be registered before `render`')
       return
     }
 
-    return super.emitChange(type, style)
+    return super.emitChange(type, path)
   }
 
   /**
@@ -65,11 +62,13 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       }
 
       componentWillUpdate () {
+        console.log(this.context)
+
         // Hook into component updates to keep styles in sync over hot code
         // reloads. This works great with React Hot Loader!
         if (module.hot && this._freeStyle.id !== freeStyle.id) {
-          this._parentFreeStyle.detach(this._freeStyle)
-          this._parentFreeStyle.attach(freeStyle)
+          this._parentFreeStyle.unmerge(this._freeStyle)
+          this._parentFreeStyle.merge(freeStyle)
           this._freeStyle = freeStyle
         }
 
@@ -77,13 +76,13 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       }
 
       componentWillMount () {
-        this._parentFreeStyle.attach(this._freeStyle)
+        this._parentFreeStyle.merge(this._freeStyle)
 
         ;(proto.componentWillMount || noop).call(this)
       }
 
       componentWillUnmount () {
-        this._parentFreeStyle.detach(this._freeStyle)
+        this._parentFreeStyle.unmerge(this._freeStyle)
 
         ;(proto.componentWillUnmount || noop).call(this)
       }
@@ -111,16 +110,16 @@ export class StyleElement extends React.Component<{}, {}> {
   onChange = () => this.forceUpdate()
 
   componentWillMount () {
-    this.context.freeStyle.addChangeListener(this.onChange)
+    ;(this.context as any).freeStyle.addChangeListener(this.onChange)
   }
 
   componentWillUnmount () {
-    this.context.freeStyle.removeChangeListener(this.onChange)
+    ;(this.context as any).freeStyle.removeChangeListener(this.onChange)
   }
 
   render () {
     return React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: this.context.freeStyle.getStyles() }
+      dangerouslySetInnerHTML: { __html: (this.context as any).freeStyle.getStyles() }
     })
   }
 
