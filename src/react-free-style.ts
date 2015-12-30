@@ -62,8 +62,6 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       }
 
       componentWillUpdate () {
-        console.log(this.context)
-
         // Hook into component updates to keep styles in sync over hot code
         // reloads. This works great with React Hot Loader!
         if (module.hot && this._freeStyle.id !== freeStyle.id) {
