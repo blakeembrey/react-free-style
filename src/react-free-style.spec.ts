@@ -172,8 +172,6 @@ describe('react free style', function () {
 
     }
 
-    expect((<any> App).displayName).to.equal('App')
-
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div class="' + TEXT_STYLE + '">' +
       'Hello world!' +

@@ -33,32 +33,25 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
    * wrapped with the style functionality.
    */
   component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
-    /**
-     * Alias `free-style` instance for changes.
-     */
     const freeStyle = this
-    const proto = Component.prototype
 
-    class ReactFreeStyleComponent extends Component {
+    return class ReactFreeStyleComponent extends React.Component <any, any> {
       context: any
       _freeStyle = freeStyle
       _parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
 
-      // Make sure debugging with React looks the same.
-      static displayName = (<any> Component).displayName || (<any> Component).name
-
-      static contextTypes = extend(Component.contextTypes, {
+      static contextTypes: React.ValidationMap<any> = {
         freeStyle: React.PropTypes.object
-      })
+      }
 
-      static childContextTypes = extend(Component.childContextTypes, {
+      static childContextTypes: React.ValidationMap<any> = {
         freeStyle: React.PropTypes.object.isRequired
-      })
+      }
 
       getChildContext () {
-        return extend((proto.getChildContext || noop).call(this), {
+        return {
           freeStyle: this._parentFreeStyle
-        })
+        }
       }
 
       componentWillUpdate () {
@@ -69,27 +62,21 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
           this._parentFreeStyle.merge(freeStyle)
           this._freeStyle = freeStyle
         }
-
-        ;(proto.componentWillUpdate || noop).apply(this, arguments)
       }
 
       componentWillMount () {
         this._parentFreeStyle.merge(this._freeStyle)
-
-        ;(proto.componentWillMount || noop).call(this)
       }
 
       componentWillUnmount () {
         this._parentFreeStyle.unmerge(this._freeStyle)
-
-        ;(proto.componentWillUnmount || noop).call(this)
       }
+
+      render () {
+        return React.createElement(Component, this.props)
+      }
+
     }
-
-    // Alias `render` to the prototype for React Hot Loader to pick up changes.
-    ;(<any> ReactFreeStyleComponent).prototype.render = proto.render
-
-    return ReactFreeStyleComponent
   }
 
 }
