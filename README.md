@@ -34,7 +34,7 @@ var TEXT_STYLE = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-// Create a React component.
+// Create a React component (also rendering the `Style.Element` component).
 var App = React.createClass({
 
   render: function () {
@@ -49,7 +49,7 @@ var App = React.createClass({
 
 })
 
-// Extend `App` to create a new class with style injection.
+// Wrap `App` to create a component with style merging.
 App = Style.component(App)
 
 // Render to the document.
@@ -58,38 +58,9 @@ React.render(<App />, document.body)
 
 **Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
 
-### With ES6 Modules and Decorators
-
-```js
-import { create, injectStyle } from 'react-free-style'
-
-const Style = create()
-
-const TEXT_STYLE = Style.registerStyle({
-  backgroundColor: 'red'
-})
-
-@injectStyle(Style)
-class App extends React.Component {
-
-  render () {
-    return (
-      <div className={TEXT_STYLE}>
-        Hello world!
-
-        <Style.Element />
-      </div>
-    )
-  }
-
-}
-
-React.render(<App />, document.body)
-```
-
 ### Register Style
 
-Register a [name spaced style](https://github.com/blakeembrey/free-style#namespaced-styles) object.
+Register a [style](https://github.com/blakeembrey/free-style#hashed-styles).
 
 ```js
 Style.registerStyle({
@@ -100,7 +71,7 @@ Style.registerStyle({
 
 ### Register Keyframes
 
-Register a [name spaced keyframes](https://github.com/blakeembrey/free-style#keyframes) object.
+Register [keyframes](https://github.com/blakeembrey/free-style#register-keyframes).
 
 ```js
 Style.registerKeyframes({

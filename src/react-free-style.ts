@@ -3,8 +3,6 @@ import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
 import extend = require('xtend')
 export import FreeStyle = require('free-style')
 
-declare const module: any
-
 /**
  * Create a specialized free style instance.
  */
@@ -57,7 +55,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
       componentWillUpdate () {
         // Hook into component updates to keep styles in sync over hot code
         // reloads. This works great with React Hot Loader!
-        if (module.hot && this._freeStyle.id !== freeStyle.id) {
+        if (this._freeStyle.id !== freeStyle.id) {
           this._parentFreeStyle.unmerge(this._freeStyle)
           this._parentFreeStyle.merge(freeStyle)
           this._freeStyle = freeStyle
@@ -116,17 +114,3 @@ export class StyleElement extends React.Component<{}, {}> {
 export function create () {
   return new ReactFreeStyle()
 }
-
-/**
- * Accept a style instance for use with decorators.
- */
-export function injectStyle (Style: ReactFreeStyle) {
-  return function <T> (Component: T): T {
-    return <any> Style.component(<any> Component)
-  }
-}
-
-/**
- * Noop.
- */
-function noop () {}

@@ -3,7 +3,7 @@
 import { expect } from 'chai'
 import * as React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { create, ReactFreeStyle, FreeStyle, injectStyle } from './react-free-style'
+import { create, ReactFreeStyle, FreeStyle } from './react-free-style'
 
 describe('react free style', function () {
   let Style: ReactFreeStyle
@@ -149,33 +149,6 @@ describe('react free style', function () {
       '<button class="' + BUTTON_STYLE + '">Hello world!</button>' +
       '</div>' +
       '<style>.' + APP_STYLE + '{color:blue}.' + BUTTON_STYLE + '{background-color:red}</style>' +
-      '</div>'
-    )
-  })
-
-  it('should set display name to the component name', function () {
-    const TEXT_STYLE = Style.registerStyle({
-      backgroundColor: 'red'
-    })
-
-    @injectStyle(Style)
-    class App extends React.Component<{}, {}> {
-
-      render () {
-        return React.createElement(
-          'div',
-          { className: TEXT_STYLE },
-          'Hello world!',
-          React.createElement(Style.Element)
-        )
-      }
-
-    }
-
-    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + TEXT_STYLE + '">' +
-      'Hello world!' +
-      '<style>.' + TEXT_STYLE + '{background-color:red}</style>' +
       '</div>'
     )
   })
