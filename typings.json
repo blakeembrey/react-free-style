@@ -4,8 +4,7 @@
     "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#575d70adcad0086ec8c6f672a5eb569a4689486c"
   },
   "dependencies": {
-    "free-style": "npm:free-style",
-    "xtend": "github:typings/typed-xtend#63cccadf3295b3c15561ee45617ac006edcca9e0"
+    "free-style": "npm:free-style"
   },
   "ambientDevDependencies": {
     "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#7f14ac023aee0836218cc32278882de14559372a",

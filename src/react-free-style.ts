@@ -1,6 +1,5 @@
 import React = require('react')
 import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
-import extend = require('xtend')
 export import FreeStyle = require('free-style')
 
 /**
