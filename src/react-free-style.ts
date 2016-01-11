@@ -19,11 +19,13 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
    */
   component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
     const freeStyle = this
+    const displayName = (Component as any).displayName || (Component as any).name
 
-    return class ReactFreeStyleComponent extends React.Component <any, any> {
-      context: any
+    return class FreeStyleComponent extends React.Component <any, any> {
       _freeStyle = freeStyle
-      _parentFreeStyle = this.context.freeStyle || new ReactFreeStyle()
+      _parentFreeStyle = (this.context as any).freeStyle || new ReactFreeStyle()
+
+      static displayName = `FreeStyleComponent${displayName ? `<${displayName}>` : ''}`
 
       static contextTypes: React.ValidationMap<any> = {
         freeStyle: React.PropTypes.object
