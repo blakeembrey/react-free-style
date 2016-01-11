@@ -13,18 +13,6 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
   Element = StyleElement
 
   /**
-   * Override emit change to warn when changing styles during render.
-   */
-  emitChange (type: string, path: any) {
-    if (ReactCurrentOwner.current != null) {
-      console.warn('Inline styles must be registered before `render`')
-      return
-    }
-
-    return super.emitChange(type, path)
-  }
-
-  /**
    * Create a React component that inherits from a user component. This is
    * required for methods on the user component to continue working once
    * wrapped with the style functionality.
@@ -89,7 +77,13 @@ export class StyleElement extends React.Component<{}, {}> {
     freeStyle: React.PropTypes.object.isRequired
   }
 
-  onChange = () => this.forceUpdate()
+  onChange = () => {
+    if (ReactCurrentOwner.current != null) {
+      console.warn('React Free Style: Inline styles can not be registered during `render`')
+    }
+
+    return this.forceUpdate()
+  }
 
   componentWillMount () {
     ;(this.context as any).freeStyle.addChangeListener(this.onChange)
