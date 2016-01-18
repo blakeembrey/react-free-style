@@ -58,9 +58,9 @@ React.render(<App />, document.body)
 
 **Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
 
-### Register Style
+### Styles
 
-Register a [style](https://github.com/blakeembrey/free-style#hashed-styles).
+Register a [style](https://github.com/blakeembrey/free-style#styles).
 
 ```js
 Style.registerStyle({
@@ -69,9 +69,9 @@ Style.registerStyle({
 })
 ```
 
-### Register Keyframes
+### Keyframes
 
-Register [keyframes](https://github.com/blakeembrey/free-style#register-keyframes).
+Register [keyframes](https://github.com/blakeembrey/free-style#keyframes).
 
 ```js
 Style.registerKeyframes({
@@ -80,6 +80,18 @@ Style.registerKeyframes({
   },
   to: {
     color: 'blue'
+  }
+})
+```
+
+### Rules
+
+Register [rule](https://github.com/blakeembrey/free-style#rules).
+
+```js
+Style.registerRule('@media print', {
+  body: {
+    color: 'red'
   }
 })
 ```

@@ -81,7 +81,7 @@ export class StyleElement extends React.Component<{}, {}> {
 
   onChange = () => {
     if (ReactCurrentOwner.current != null) {
-      console.warn('React Free Style: Inline styles can not be registered during `render`')
+      console.warn('React Free Style: Inline styles can not be registered during `render`. If you want to register styles dynamically, you should use `componentWillMount` and `componentWillUnmount` to manage styles (remember to use `FreeStyle#get(id)` and `FreeStyle#remove(instance)` to remove styles after use)')
     }
 
     return this.forceUpdate()
