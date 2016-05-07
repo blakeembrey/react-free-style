@@ -40,10 +40,10 @@
     "mocha": "^2.1.0",
     "ntypescript": "^1.201508100803.1",
     "pre-commit": "^1.0.6",
-    "react": "^0.14.3",
-    "react-dom": "^0.14.3",
+    "react": "^15.0.2",
+    "react-dom": "^15.0.2",
     "typescript": "^1.7.5",
-    "typings": "^0.5.1"
+    "typings": "^0.8.1"
   },
   "dependencies": {
     "free-style": "^1.0.0"
