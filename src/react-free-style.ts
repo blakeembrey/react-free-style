@@ -17,7 +17,7 @@ export class ReactFreeStyle extends FreeStyle.FreeStyle {
    * required for methods on the user component to continue working once
    * wrapped with the style functionality.
    */
-  component (Component: React.ComponentClass<any>): React.ComponentClass<any> {
+  component (Component: React.ComponentClass<any> | React.StatelessComponent<any>): React.ComponentClass<any> {
     const freeStyle = this
     const displayName = (Component as any).displayName || (Component as any).name
 
