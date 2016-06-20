@@ -1,12 +1,12 @@
 {
-  "ambientDependencies": {
+  "globalDependencies": {
     "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#575d70adcad0086ec8c6f672a5eb569a4689486c",
     "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#575d70adcad0086ec8c6f672a5eb569a4689486c"
   },
   "dependencies": {
     "free-style": "npm:free-style"
   },
-  "ambientDevDependencies": {
+  "globalDevDependencies": {
     "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#7f14ac023aee0836218cc32278882de14559372a",
     "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#ca5bfe76d2d9bf6852cbc712d9f3e0047c93486e",
     "react-lib-current-owner": "file:custom_typings/react.d.ts"

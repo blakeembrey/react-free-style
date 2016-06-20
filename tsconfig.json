@@ -7,11 +7,11 @@
     "noImplicitAny": true,
     "removeComments": false,
     "sourceMap": true,
-    "experimentalDecorators": true
+    "inlineSources": true
   },
   "files": [
     "src/react-free-style.ts",
     "src/react-free-style.spec.ts",
-    "typings/main.d.ts"
+    "typings/index.d.ts"
   ]
 }
