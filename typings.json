@@ -7,8 +7,8 @@
     "free-style": "npm:free-style"
   },
   "globalDevDependencies": {
-    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#7f14ac023aee0836218cc32278882de14559372a",
-    "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#ca5bfe76d2d9bf6852cbc712d9f3e0047c93486e",
+    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#f9117cf5dd3420b4fcb4342bf287945695a953a4",
+    "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#b9642fb8ac07f7164dc643ddd1fa99b58ae9be8b",
     "react-lib-current-owner": "file:custom_typings/react.d.ts"
   }
 }
