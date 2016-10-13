@@ -25,9 +25,9 @@ export function wrap <T> (
   const displayName = Component.displayName || (Component as any).name
   const componentStyles = styles.map(x => x.clone())
 
-  return class StyleComponent <T> extends React.Component <T, any> {
+  return class StyleContainer <T> extends React.Component <T, any> {
 
-    static displayName = `FreeStyleComponent${displayName ? `<${displayName}>` : ''}`
+    static displayName = `FreeStyleContainer${displayName ? `<${displayName}>` : ''}`
 
     static contextTypes: React.ValidationMap<any> = {
       freeStyle: React.PropTypes.object,

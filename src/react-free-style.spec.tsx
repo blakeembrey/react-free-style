@@ -166,4 +166,32 @@ describe('react free style', function () {
       '</div>'
     )
   })
+
+  it('should work with stateless components', function () {
+    let inlineStyle = ''
+
+    const appStyle = Style.registerStyle({
+      background: 'red'
+    })
+
+    const ChildComponent: React.StatelessComponent<{}> = (props: {}, context: ReactFreeStyleContext) => {
+      inlineStyle = context.freeStyle.registerStyle({ color: 'blue' })
+
+      return <span className={inlineStyle}>hello world</span>
+    }
+
+    ChildComponent.contextTypes = {
+      freeStyle: React.PropTypes.object.isRequired
+    }
+
+    const Child = wrap(ChildComponent)
+
+    const App = wrap(() => {
+      return <div className={appStyle}><Child /></div>
+    })
+
+    expect(renderToStaticMarkup(React.createElement(App))).to.equal(
+      '<div class="' + appStyle + '"><span class="' + inlineStyle + '">hello world</span></div>'
+    )
+  })
 })

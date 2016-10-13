@@ -7,12 +7,12 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "removeComments": false,
+    "jsx": "react",
     "sourceMap": true,
     "inlineSources": true
   },
-  "files": [
-    "src/react-free-style.ts",
-    "src/react-free-style.spec.ts",
-    "typings/index.d.ts"
+  "include": [
+    "src/**/*",
+    "typings/**/*"
   ]
 }
