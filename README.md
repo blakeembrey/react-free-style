@@ -127,6 +127,22 @@ class MyComponent extends React.Component {
 export default wrap(MyComponent)
 ```
 
+#### With Stateless React Components
+
+```js
+const MyComponent = (props, context) => {
+  inlineStyle = context.freeStyle.registerStyle({ color: 'blue' })
+
+  return <span className={inlineStyle}>hello world</span>
+}
+
+MyComponent.contextTypes = {
+  freeStyle: React.PropTypes.object.isRequired
+}
+
+export default wrap(MyComponent)
+```
+
 ## License
 
 MIT license

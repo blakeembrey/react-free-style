@@ -186,12 +186,16 @@ describe('react free style', function () {
 
     const Child = wrap(ChildComponent)
 
-    const App = wrap(() => {
-      return <div className={appStyle}><Child /></div>
-    })
+    const App = wrap(
+      () => <div className={appStyle}><Child /><StyleElement /></div>,
+      Style
+    )
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + appStyle + '"><span class="' + inlineStyle + '">hello world</span></div>'
+      '<div class="' + appStyle + '">' +
+      '<span class="' + inlineStyle + '">hello world</span>' +
+      '<style>.' + appStyle + '{background:red}.' + inlineStyle + '{color:blue}</style>' +
+      '</div>'
     )
   })
 })
