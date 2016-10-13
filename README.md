@@ -26,20 +26,22 @@ npm install react-free-style --save
 ## Usage
 
 ```js
+import { create, wrap, StyleElement } from 'react-free-style'
+
 // Create a style instance for the component.
-var Style = require('react-free-style').create()
+const Style = create()
 
 // Register some styles.
-var TEXT_STYLE = Style.registerStyle({
+var textStyle = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-// Create a React component (also rendering the `Style.Element` component).
+// Create a React component (which is also rendering the `StyleElement` component).
 var App = React.createClass({
 
   render: function () {
     return (
-      <div className={TEXT_STYLE}>
+      <div className={textStyle}>
         Hello world!
 
         <Style.Element />
@@ -49,14 +51,14 @@ var App = React.createClass({
 
 })
 
-// Wrap `App` to create a component with style merging.
-App = Style.component(App)
+// Wrap `App` with the styles to automatically render CSS changes.
+App = wrap(App, Style)
 
 // Render to the document.
 React.render(<App />, document.body)
 ```
 
-**Note:** You should render `Style.Element` at the root level of your application, but it must be a child of `Style.component()`. I recommend rendering it last so it receives all styles after the first render (required for isomorphic applications).
+**Note:** You should render `StyleElement` once at the root level of your application, but it must be a child of `wrap()`. I recommend rendering it last so it receives all styles after the first render, which is useful for isomorphic applications.
 
 ### Styles
 
@@ -94,6 +96,35 @@ Style.registerRule('@media print', {
     color: 'red'
   }
 })
+```
+
+### Dynamical Styles, Keyframes and Rules
+
+```js
+class MyComponent extends React.Component {
+
+  static contextTypes = {
+    freeStyle: React.PropTypes.object.isRequired
+  }
+
+  componentWillMount () {
+    // Also has `registerKeyframes` and `registerRule` methods.
+    this.inlineClassName = this.context.freeStyle.registerStyle(this.props.style)
+  }
+
+  render () {
+    return React.createElement(
+      'button',
+      {
+        className: this.inlineClassName
+      },
+      this.props.children
+    )
+  }
+
+}
+
+export default wrap(MyComponent)
 ```
 
 ## License
