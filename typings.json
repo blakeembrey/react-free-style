@@ -1,14 +1,9 @@
 {
-  "globalDependencies": {
-    "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#575d70adcad0086ec8c6f672a5eb569a4689486c",
-    "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#575d70adcad0086ec8c6f672a5eb569a4689486c"
-  },
-  "dependencies": {
-    "free-style": "npm:free-style"
-  },
   "globalDevDependencies": {
-    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#f9117cf5dd3420b4fcb4342bf287945695a953a4",
-    "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#b9642fb8ac07f7164dc643ddd1fa99b58ae9be8b",
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
+    "react": "registry:dt/react#0.14.0+20161008064207",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "react-lib-current-owner": "file:custom_typings/react.d.ts"
   }
 }
