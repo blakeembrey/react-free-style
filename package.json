@@ -45,6 +45,6 @@
     "typings": "^1.3.0"
   },
   "dependencies": {
-    "free-style": "^1.0.0"
+    "free-style": "^2.0.0"
   }
 }
