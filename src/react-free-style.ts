@@ -109,7 +109,9 @@ export class StyleElement extends React.Component<{}, {}> {
   render () {
     const style = (this.context as ReactFreeStyleContext).rootFreeStyle.style.getStyles()
 
-    return React.createElement('style', {}, style)
+    return React.createElement('style', {
+      dangerouslySetInnerHTML: { __html: style }
+    })
   }
 
 }
