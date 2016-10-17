@@ -14,8 +14,8 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 **Even more improvements with React Free Style**
 
 * Modular React.js components (automatically namespaced CSS)
-* Fast renders with automatic style mounting (outputs only the styles on page)
-* Supports isomorphic applications by default
+* Fast renders with automatic style mounting (outputs only the styles on the current page)
+* Supports isomorphic applications
 
 ## Installation
 
@@ -26,39 +26,77 @@ npm install react-free-style --save
 ## Usage
 
 ```js
-import { create, wrap, StyleElement } from 'react-free-style'
+import * as ReactFreeStyle from 'react-free-style'
 
 // Create a style instance for the component.
-const Style = create()
+const Style = ReactFreeStyle.create()
 
 // Register some styles.
 var textStyle = Style.registerStyle({
   backgroundColor: 'red'
 })
 
-// Create a React component (which is also rendering the `StyleElement` component).
+// Create a React component (in the browser, styles are inserted into `<head />`).
 var App = React.createClass({
 
   render: function () {
     return (
       <div className={textStyle}>
         Hello world!
-
-        <Style.Element />
       </div>
     )
   }
 
 })
 
-// Wrap `App` with the styles to automatically render CSS changes.
-App = wrap(App, Style)
+// Wrap `App` with the styles to render them together.
+App = ReactFreeStyle.wrap(App, Style)
 
-// Render to the document.
+// Render the application to the document.
 React.render(<App />, document.body)
 ```
 
-**Note:** You should render `StyleElement` once at the root level of your application, but it must be a child of `wrap()`. I recommend rendering it last so it receives all styles after the first render, which is useful for isomorphic applications.
+### Server Usage
+
+```js
+ReactDOM.renderToString(<Handler />);
+
+const styles = ReactFreeStyle.rewind()
+
+// Use as a React component.
+function html () {
+  return (
+    <html>
+      <head>
+        {styles.toComponent()}
+      </head>
+      <body>
+        <div id="content">
+          // React stuff here.
+        </div>
+      </body>
+    </html>
+  )
+}
+
+// Use as a string.
+const html = `
+  <!doctype html>
+  <html>
+    <head>
+      ${styles.toString()}
+    </head>
+    <body>
+      <div id="content">
+        // React stuff here.
+      </div>
+    </body>
+  </html>
+`
+
+// Use the CSS only.
+const css = styles.toCss()
+```
 
 ### Styles
 

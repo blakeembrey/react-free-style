@@ -1,142 +1,47 @@
 import React = require('react')
-import ReactCurrentOwner = require('react/lib/ReactCurrentOwner')
 import * as FreeStyle from 'free-style'
 
 /**
- * Re-export the `free-style` module.
+ * Tag the element for rendering later.
  */
-export { FreeStyle }
+const STYLE_ATTRIBUTE = 'data-react-free-style'
 
 /**
- * The context used with `react-free-style`.
+ * Check whether we can render on the server/browser.
  */
-export interface ReactFreeStyleContext {
-  freeStyle: StyleContext
-  rootFreeStyle: RootStyleContext
-}
-
-/**
- * Wrap a React component to automatically attach and detach styles.
- */
-export function wrap <T> (
-  Component: React.ComponentClass<T> | React.StatelessComponent<T>,
-  ...styles: FreeStyle.FreeStyle[]
-): React.ComponentClass<T> {
-  const displayName = Component.displayName || (Component as any).name
-  const componentStyles = styles.map(x => x.clone())
-
-  return class StyleContainer <T> extends React.Component <T, any> {
-
-    static displayName = `FreeStyleContainer(${displayName || 'Component'})`
-
-    static contextTypes: React.ValidationMap<any> = {
-      freeStyle: React.PropTypes.object,
-      rootFreeStyle: React.PropTypes.object
-    }
-
-    static childContextTypes: React.ValidationMap<any> = {
-      freeStyle: React.PropTypes.object.isRequired,
-      rootFreeStyle: React.PropTypes.object.isRequired
-    }
-
-    _rootFreeStyle = (this.context as ReactFreeStyleContext).rootFreeStyle || new RootStyleContext()
-    _freeStyle = new StyleContext(this._rootFreeStyle)
-
-    getChildContext () {
-      return {
-        freeStyle: this._freeStyle,
-        rootFreeStyle: this._rootFreeStyle
-      }
-    }
-
-    componentWillMount () {
-      for (const style of componentStyles) {
-        this._rootFreeStyle.style.merge(style)
-      }
-
-      this._freeStyle.mount()
-    }
-
-    componentWillUnmount () {
-      for (const style of componentStyles) {
-        this._rootFreeStyle.style.unmerge(style)
-      }
-
-      this._freeStyle.unmount()
-    }
-
-    render () {
-      return React.createElement(Component, this.props as any)
-    }
-
-  }
-}
-
-/**
- * Create the `<style />` element.
- */
-export class StyleElement extends React.Component<{}, {}> {
-
-  static displayName = 'Style'
-
-  static contextTypes: React.ValidationMap<any> = {
-    rootFreeStyle: React.PropTypes.object.isRequired
-  }
-
-  onChange = () => {
-    if (ReactCurrentOwner.current != null) {
-      console.warn(
-        'React Free Style: Inline styles can not be registered during `render`. ' +
-        'If you want to style dynamically, use `componentWillMount` instead.'
-      )
-    }
-
-    return this.forceUpdate()
-  }
-
-  componentWillMount () {
-    ;(this.context as ReactFreeStyleContext).rootFreeStyle.addChangeListener(this.onChange)
-  }
-
-  componentWillUnmount () {
-    ;(this.context as ReactFreeStyleContext).rootFreeStyle.removeChangeListener(this.onChange)
-  }
-
-  render () {
-    const style = (this.context as ReactFreeStyleContext).rootFreeStyle.style.getStyles()
-
-    return React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: style }
-    })
-  }
-
-}
+export const canUseDOM = !!(
+  typeof window !== 'undefined' &&
+  window.document &&
+  window.document.createElement
+)
 
 /**
  * Create a class for passing down the style context.
  */
-export class RootStyleContext {
+export class GlobalStyleContext {
 
-  listeners: Array<() => void> = []
   style = create()
   prevChangeId = this.style.changeId
+  element: HTMLStyleElement
 
-  changed () {
-    if (this.style.changeId !== this.prevChangeId) {
-      this.prevChangeId = this.style.changeId
-      this.listeners.forEach(x => x())
+  constructor () {
+    if (canUseDOM) {
+      this.element = document.querySelector(`style[${STYLE_ATTRIBUTE}]`) as HTMLStyleElement
+
+      if (!this.element) {
+        this.element = document.createElement('style')
+        this.element.setAttribute('type', 'text/css')
+        this.element.setAttribute(STYLE_ATTRIBUTE, 'true')
+
+        document.head.appendChild(this.element)
+      }
     }
   }
 
-  addChangeListener (cb: () => void) {
-    this.listeners.push(cb)
-  }
-
-  removeChangeListener (cb: () => void) {
-    const indexOf = this.listeners.indexOf(cb)
-
-    if (indexOf > -1) {
-      this.listeners.splice(indexOf, 1)
+  changed () {
+    if (canUseDOM && this.style.changeId !== this.prevChangeId) {
+      this.prevChangeId = this.style.changeId
+      this.element.textContent = this.style.getStyles()
     }
   }
 
@@ -149,39 +54,165 @@ export class StyleContext {
 
   style = create()
 
-  constructor (public root: RootStyleContext) {}
+  constructor (public global: GlobalStyleContext) {}
 
   registerStyle (styles: FreeStyle.UserStyles, displayName?: string) {
-    this.root.style.unmerge(this.style)
+    this.global.style.unmerge(this.style)
     const className = this.style.registerStyle(styles, displayName)
-    this.root.style.merge(this.style)
-    this.root.changed()
+    this.global.style.merge(this.style)
+    this.global.changed()
     return className
   }
 
   registerKeyframes (styles: FreeStyle.UserStyles, displayName?: string) {
-    this.root.style.unmerge(this.style)
+    this.global.style.unmerge(this.style)
     const keyframes = this.style.registerKeyframes(styles, displayName)
-    this.root.style.merge(this.style)
-    this.root.changed()
+    this.global.style.merge(this.style)
+    this.global.changed()
     return keyframes
   }
 
   registerRule (rule: string, styles: FreeStyle.UserStyles) {
-    this.root.style.unmerge(this.style)
+    this.global.style.unmerge(this.style)
     this.style.registerRule(rule, styles)
-    this.root.style.merge(this.style)
-    this.root.changed()
+    this.global.style.merge(this.style)
+    this.global.changed()
   }
 
   mount () {
-    this.root.style.merge(this.style)
-    this.root.changed()
+    this.global.style.merge(this.style)
+    this.global.changed()
   }
 
   unmount () {
-    this.root.style.unmerge(this.style)
-    this.root.changed()
+    this.global.style.unmerge(this.style)
+    this.global.changed()
+  }
+
+}
+
+/**
+ * Re-export the `free-style` module.
+ */
+export { FreeStyle }
+
+/**
+ * Create a global style container.
+ */
+let global = new GlobalStyleContext()
+
+/**
+ * Get the current render styles.
+ */
+export function rewind () {
+  if (canUseDOM) {
+    throw new Error('You can only call `rewind()` on the server. Call `peek()` to read the current styles.')
+  }
+
+  const styles = peek()
+  global = new GlobalStyleContext()
+  return styles
+}
+
+/**
+ * The interface for "peeking" results.
+ */
+export interface Peek {
+  toComponent (): React.DOMElement<{}, HTMLStyleElement>
+  toString (): string
+  toCss (): string
+}
+
+/**
+ * Peek at the current styles without clearing.
+ */
+export function peek (): Peek {
+  const css = global.style.getStyles()
+
+  return {
+    toComponent () {
+      return React.createElement('style', {
+        [STYLE_ATTRIBUTE]: true,
+        dangerouslySetInnerHTML: { __html: css }
+      })
+    },
+    toString () {
+      return `<style ${STYLE_ATTRIBUTE}="true">${css}</style>`
+    },
+    toCss () {
+      return css
+    }
+  }
+}
+
+/**
+ * Wrap a component instead of adding it to the markup manually.
+ */
+export function wrap <T> (
+  Component: React.ComponentClass<T> | React.StatelessComponent<T>,
+  style?: FreeStyle.FreeStyle
+) {
+  return function (props: T, context: any) {
+    return React.createElement(Style, { style }, React.createElement(Component, props))
+  }
+}
+
+/**
+ * Style properties.
+ */
+export interface StyleProps {
+  style?: FreeStyle.FreeStyle
+}
+
+/**
+ * Context for child components.
+ */
+export interface ReactFreeStyleContext {
+  freeStyle: StyleContext
+}
+
+/**
+ * Create a style component.
+ */
+export class Style extends React.Component<StyleProps, {}> {
+
+  static displayName = 'Style'
+
+  static propsTypes: React.ValidationMap<any> = {
+    style: React.PropTypes.object.isRequired,
+    children: React.PropTypes.node.isRequired
+  }
+
+  static childContextTypes: React.ValidationMap<any> = {
+    freeStyle: React.PropTypes.object.isRequired
+  }
+
+  _freeStyle = new StyleContext(global)
+
+  getChildContext (): ReactFreeStyleContext {
+    return {
+      freeStyle: this._freeStyle
+    }
+  }
+
+  componentWillMount () {
+    if (this.props.style) {
+      this._freeStyle.style.merge(this.props.style)
+    }
+
+    this._freeStyle.mount()
+  }
+
+  componentWillUnmount () {
+    if (this.props.style) {
+      this._freeStyle.style.unmerge(this.props.style)
+    }
+
+    this._freeStyle.unmount()
+  }
+
+  render () {
+    return React.Children.only(this.props.children as any)
   }
 
 }

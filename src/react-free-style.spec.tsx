@@ -3,17 +3,17 @@
 import { expect } from 'chai'
 import * as React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { create, wrap, StyleElement, FreeStyle, ReactFreeStyleContext } from './react-free-style'
+import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext } from './react-free-style'
 
 describe('react free style', function () {
-  let Style: FreeStyle.FreeStyle
+  let TestStyle: FreeStyle.FreeStyle
 
   beforeEach(function () {
-    Style = create()
+    TestStyle = create()
   })
 
   it('should render the main example', function () {
-    const textStyle = Style.registerStyle({
+    const textStyle = TestStyle.registerStyle({
       backgroundColor: 'red'
     })
 
@@ -23,29 +23,33 @@ describe('react free style', function () {
 
       render () {
         return React.createElement(
-          'div',
-          { className: textStyle },
-          'Hello world!',
-          React.createElement(StyleElement)
+          Style,
+          { style: TestStyle },
+          React.createElement(
+            'div',
+            { className: textStyle },
+            'Hello world!'
+          )
         )
       }
 
     })
 
-    const App = wrap(Component, Style)
+    const App = wrap(Component, TestStyle)
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
-      '<div class="' + textStyle + '">' +
-      'Hello world!' +
-      '<style>.' + textStyle + '{background-color:red}</style>' +
-      '</div>'
+      `<div class="${textStyle}">Hello world!</div>`
+    )
+
+    expect(rewind().toString()).to.equal(
+      `<style data-react-free-style="true">.${textStyle}{background-color:red}</style>`
     )
   })
 
   it('should render the example dynamic styles', function () {
     let inlineStyle = ''
 
-    const buttonStyle = Style.registerStyle({
+    const buttonStyle = TestStyle.registerStyle({
       backgroundColor: 'red',
       padding: 10
     })
@@ -86,27 +90,30 @@ describe('react free style', function () {
             ButtonComponent,
             { style: { color: 'blue'} },
             'Hello world!'
-          ),
-          React.createElement(StyleElement)
+          )
         )
       }
 
     })
 
-    const App = wrap(Component, Style)
+    const App = wrap(Component, TestStyle)
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div>' +
       '<button class="' + inlineStyle + ' ' + buttonStyle + '">Hello world!</button>' +
-      '<style>.' + buttonStyle + '{background-color:red;padding:10px}.' + inlineStyle + '{color:blue}</style>' +
       '</div>'
+    )
+
+    expect(rewind().toString()).to.equal(
+      `<style data-react-free-style="true">.${buttonStyle}{background-color:red;` +
+      `padding:10px}.${inlineStyle}{color:blue}</style>`
     )
   })
 
   it('should work with nested styles', function () {
     const NestedStyle = create()
 
-    const appStyle = Style.registerStyle({
+    const appStyle = TestStyle.registerStyle({
       color: 'blue'
     })
 
@@ -148,13 +155,12 @@ describe('react free style', function () {
           return React.createElement(
             'div',
             { className: appStyle },
-            React.createElement(Child),
-            React.createElement(StyleElement)
+            React.createElement(Child)
           )
         }
 
       }),
-      Style
+      TestStyle
     )
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
@@ -162,15 +168,18 @@ describe('react free style', function () {
       '<div>' +
       '<button class="' + buttonStyle + '">Hello world!</button>' +
       '</div>' +
-      '<style>.' + appStyle + '{color:blue}.' + buttonStyle + '{background-color:red}</style>' +
       '</div>'
+    )
+
+    expect(rewind().toString()).to.equal(
+      `<style data-react-free-style="true">.${appStyle}{color:blue}.${buttonStyle}{background-color:red}</style>`
     )
   })
 
   it('should work with stateless components', function () {
     let inlineStyle = ''
 
-    const appStyle = Style.registerStyle({
+    const appStyle = TestStyle.registerStyle({
       background: 'red'
     })
 
@@ -187,15 +196,18 @@ describe('react free style', function () {
     const Child = wrap(ChildComponent)
 
     const App = wrap(
-      () => <div className={appStyle}><Child /><StyleElement /></div>,
-      Style
+      () => <div className={appStyle}><Child /></div>,
+      TestStyle
     )
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
       '<div class="' + appStyle + '">' +
       '<span class="' + inlineStyle + '">hello world</span>' +
-      '<style>.' + appStyle + '{background:red}.' + inlineStyle + '{color:blue}</style>' +
       '</div>'
+    )
+
+    expect(rewind().toString()).to.equal(
+      `<style data-react-free-style="true">.${appStyle}{background:red}.${inlineStyle}{color:blue}</style>`
     )
   })
 })
