@@ -27,7 +27,7 @@ export function wrap <T> (
 
   return class StyleContainer <T> extends React.Component <T, any> {
 
-    static displayName = `FreeStyleContainer${displayName ? `<${displayName}>` : ''}`
+    static displayName = `FreeStyleContainer(${displayName || 'Component'})`
 
     static contextTypes: React.ValidationMap<any> = {
       freeStyle: React.PropTypes.object,
@@ -41,10 +41,6 @@ export function wrap <T> (
 
     _rootFreeStyle = (this.context as ReactFreeStyleContext).rootFreeStyle || new RootStyleContext()
     _freeStyle = new StyleContext(this._rootFreeStyle)
-
-    constructor (public childProps: T, context: any) {
-      super(childProps, context)
-    }
 
     getChildContext () {
       return {
@@ -70,7 +66,7 @@ export function wrap <T> (
     }
 
     render () {
-      return React.createElement(Component, this.childProps as any)
+      return React.createElement(Component, this.props as any)
     }
 
   }
