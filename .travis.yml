@@ -1,3 +1,4 @@
+sudo: false
 language: node_js
 
 notifications:
@@ -6,7 +7,6 @@ notifications:
     on_failure: change
 
 node_js:
-  - "0.12"
   - "4"
   - "stable"
 
