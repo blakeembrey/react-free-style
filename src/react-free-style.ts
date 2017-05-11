@@ -10,7 +10,7 @@ const STYLE_ATTRIBUTE = 'data-react-free-style'
  * Check whether we can render on the server/browser.
  */
 export const canUseDOM = !!(
-  typeof window !== 'undefined' &&
+  typeof (window as any) !== 'undefined' &&
   window.document &&
   window.document.createElement
 )
@@ -56,7 +56,7 @@ export class StyleContext {
 
   constructor (public global: GlobalStyleContext) {}
 
-  registerStyle (styles: FreeStyle.UserStyles, displayName?: string) {
+  registerStyle (styles: FreeStyle.Styles, displayName?: string) {
     this.global.style.unmerge(this.style)
     const className = this.style.registerStyle(styles, displayName)
     this.global.style.merge(this.style)
@@ -64,7 +64,7 @@ export class StyleContext {
     return className
   }
 
-  registerKeyframes (styles: FreeStyle.UserStyles, displayName?: string) {
+  registerKeyframes (styles: FreeStyle.Styles, displayName?: string) {
     this.global.style.unmerge(this.style)
     const keyframes = this.style.registerKeyframes(styles, displayName)
     this.global.style.merge(this.style)
@@ -72,7 +72,7 @@ export class StyleContext {
     return keyframes
   }
 
-  registerRule (rule: string, styles: FreeStyle.UserStyles) {
+  registerRule (rule: string, styles: FreeStyle.Styles) {
     this.global.style.unmerge(this.style)
     this.style.registerRule(rule, styles)
     this.global.style.merge(this.style)
@@ -146,18 +146,6 @@ export function peek (): Peek {
 }
 
 /**
- * Wrap a component instead of adding it to the markup manually.
- */
-export function wrap <T> (
-  Component: React.ComponentClass<T> | React.StatelessComponent<T>,
-  style?: FreeStyle.FreeStyle
-) {
-  return function (props: T, context: any) {
-    return React.createElement(Style, { style }, React.createElement(Component, props))
-  }
-}
-
-/**
  * Style properties.
  */
 export interface StyleProps {
@@ -215,6 +203,18 @@ export class Style extends React.Component<StyleProps, {}> {
     return React.Children.only(this.props.children as any)
   }
 
+}
+
+/**
+ * Wrap a component instead of adding it to the markup manually.
+ */
+export function wrap <T> (
+  Component: React.ComponentClass<T> | React.StatelessComponent<T>,
+  style?: FreeStyle.FreeStyle
+) {
+  return function (props: T, context: any) {
+    return React.createElement(Style, { style }, React.createElement(Component, props))
+  }
 }
 
 /**
