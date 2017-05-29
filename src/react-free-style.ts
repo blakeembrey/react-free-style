@@ -1,4 +1,5 @@
 import React = require('react')
+import PropTypes = require('prop-types')
 import * as FreeStyle from 'free-style'
 
 /**
@@ -166,13 +167,13 @@ export class Style extends React.Component<StyleProps, {}> {
 
   static displayName = 'Style'
 
-  static propsTypes: React.ValidationMap<any> = {
-    style: React.PropTypes.object.isRequired,
-    children: React.PropTypes.node.isRequired
+  static propsTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
+    style: PropTypes.object.isRequired,
+    children: PropTypes.node.isRequired
   }
 
-  static childContextTypes: React.ValidationMap<any> = {
-    freeStyle: React.PropTypes.object.isRequired
+  static childContextTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
+    freeStyle: PropTypes.object.isRequired
   }
 
   _freeStyle = new StyleContext(global)
