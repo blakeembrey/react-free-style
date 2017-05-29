@@ -167,12 +167,12 @@ export class Style extends React.Component<StyleProps, {}> {
 
   static displayName = 'Style'
 
-  static propsTypes: React.ValidationMap<any> = {
+  static propsTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
     style: PropTypes.object.isRequired,
     children: PropTypes.node.isRequired
   }
 
-  static childContextTypes: React.ValidationMap<any> = {
+  static childContextTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
     freeStyle: PropTypes.object.isRequired
   }
 
