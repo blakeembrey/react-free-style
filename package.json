@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/blakeembrey/react-free-style",
   "devDependencies": {
-    "chai": "^3.4.1",
+    "chai": "^4.0.0",
     "istanbul": "^0.4.1",
     "mocha": "^3.1.0",
     "prop-types": "^15.0.2",
