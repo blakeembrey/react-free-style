@@ -238,7 +238,7 @@ export function create (hash?: FreeStyle.HashFunction, debug?: boolean) {
 /**
  * Input object for style HOC.
  */
-export type Stylize <T extends string> = {
+export type Styled <T extends string> = {
   [K in T]: FreeStyle.Styles
 }
 
@@ -252,7 +252,7 @@ export type StylesProp <T extends string> = {
 /**
  * Props passed to the HOC child.
  */
-export type StylizeProps <T extends string> = {
+export type StyledProps <T extends string> = {
   styles: StylesProp<T>
   freeStyle: StyleContext
 }
@@ -260,7 +260,7 @@ export type StylizeProps <T extends string> = {
 /**
  * Create a HOC for styles.
  */
-export function stylize <T extends string> (styleSheet: Stylize<T>) {
+export function styled <T extends string> (styleSheet: Styled<T>) {
   const styles: StylesProp<T> = Object.create(null)
   const Style = create()
 
@@ -268,7 +268,7 @@ export function stylize <T extends string> (styleSheet: Stylize<T>) {
     styles[key] = Style.registerStyle(styleSheet[key])
   }
 
-  return <P> (Component: React.ComponentType<P & StylizeProps<T>>) => {
+  return <P> (Component: React.ComponentType<P & StyledProps<T>>) => {
     return Object.assign(wrap((props: P, { freeStyle }: any) => {
       return React.createElement(Component as any, Object.assign({}, props, { styles, freeStyle }))
     }, Style), { Style, styles })

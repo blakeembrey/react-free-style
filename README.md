@@ -27,9 +27,9 @@ npm install react-free-style --save
 ## Usage
 
 ```js
-import { stylize } from 'react-free-style'
+import { styled } from 'react-free-style'
 
-const App = stylize({
+const App = styled({
   text: {
     backgroundColor: 'red'
   }
@@ -85,10 +85,10 @@ const css = styles.toCss()
 
 ### HOC
 
-The `stylize` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
+The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
 
 ```js
-const style = stylize({
+const style = styled({
   button: {
     color: 'red'
   }

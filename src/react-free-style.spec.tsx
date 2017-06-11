@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import * as React from 'react'
 import PropTypes = require('prop-types')
 import { renderToStaticMarkup } from 'react-dom/server'
-import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext, stylize } from './react-free-style'
+import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext, styled } from './react-free-style'
 
 describe('react free style', function () {
   let TestStyle: FreeStyle.FreeStyle
@@ -211,7 +211,7 @@ describe('react free style', function () {
   })
 
   it('should work as a hoc', () => {
-    const Component = stylize({
+    const Component = styled({
       button: {
         color: 'red'
       }
