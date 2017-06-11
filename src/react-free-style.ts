@@ -53,47 +53,47 @@ export class GlobalStyleContext {
  */
 export class StyleContext {
 
-  style = create()
+  Style = create()
 
   constructor (public global: GlobalStyleContext) {}
 
   registerStyle (styles: FreeStyle.Styles, displayName?: string) {
-    this.global.style.unmerge(this.style)
-    const className = this.style.registerStyle(styles, displayName)
-    this.global.style.merge(this.style)
+    this.global.style.unmerge(this.Style)
+    const className = this.Style.registerStyle(styles, displayName)
+    this.global.style.merge(this.Style)
     this.global.changed()
     return className
   }
 
   registerKeyframes (styles: FreeStyle.Styles, displayName?: string) {
-    this.global.style.unmerge(this.style)
-    const keyframes = this.style.registerKeyframes(styles, displayName)
-    this.global.style.merge(this.style)
+    this.global.style.unmerge(this.Style)
+    const keyframes = this.Style.registerKeyframes(styles, displayName)
+    this.global.style.merge(this.Style)
     this.global.changed()
     return keyframes
   }
 
   registerRule (rule: string, styles: FreeStyle.Styles) {
-    this.global.style.unmerge(this.style)
-    this.style.registerRule(rule, styles)
-    this.global.style.merge(this.style)
+    this.global.style.unmerge(this.Style)
+    this.Style.registerRule(rule, styles)
+    this.global.style.merge(this.Style)
     this.global.changed()
   }
 
   registerCss (styles: FreeStyle.Styles) {
-    this.global.style.unmerge(this.style)
-    this.style.registerCss(styles)
-    this.global.style.merge(this.style)
+    this.global.style.unmerge(this.Style)
+    this.Style.registerCss(styles)
+    this.global.style.merge(this.Style)
     this.global.changed()
   }
 
   mount () {
-    this.global.style.merge(this.style)
+    this.global.style.merge(this.Style)
     this.global.changed()
   }
 
   unmount () {
-    this.global.style.unmerge(this.style)
+    this.global.style.unmerge(this.Style)
     this.global.changed()
   }
 
@@ -155,7 +155,7 @@ export function peek (): Peek {
  * Style properties.
  */
 export interface StyleProps {
-  style?: FreeStyle.FreeStyle
+  Style?: FreeStyle.FreeStyle
 }
 
 /**
@@ -175,12 +175,12 @@ export interface ReactFreeStyleContext {
 /**
  * Create a style component.
  */
-export class Style extends React.Component<StyleProps, {}> {
+export class StyleComponent extends React.Component<StyleProps, {}> {
 
   static displayName = 'Style'
 
   static propsTypes = {
-    style: PropTypes.object.isRequired,
+    Style: PropTypes.object.isRequired,
     children: PropTypes.node.isRequired
   }
 
@@ -195,16 +195,16 @@ export class Style extends React.Component<StyleProps, {}> {
   }
 
   componentWillMount () {
-    if (this.props.style) {
-      this._freeStyle.style.merge(this.props.style)
+    if (this.props.Style) {
+      this._freeStyle.Style.merge(this.props.Style)
     }
 
     this._freeStyle.mount()
   }
 
   componentWillUnmount () {
-    if (this.props.style) {
-      this._freeStyle.style.unmerge(this.props.style)
+    if (this.props.Style) {
+      this._freeStyle.Style.unmerge(this.props.Style)
     }
 
     this._freeStyle.unmount()
@@ -221,13 +221,14 @@ export class Style extends React.Component<StyleProps, {}> {
  */
 export function wrap <P> (
   Component: React.ComponentType<P>,
-  style?: FreeStyle.FreeStyle
+  Style?: FreeStyle.FreeStyle,
+  name = 'anonymous'
 ) {
   const Wrapped: React.StatelessComponent<P> = (props: P) => {
-    return React.createElement(Style, { style }, React.createElement(Component as any, props))
+    return React.createElement(StyleComponent, { Style }, React.createElement(Component as any, props))
   }
 
-  Wrapped.displayName = `Style<${Component.displayName || Component.name || 'anonymous'}>`
+  Wrapped.displayName = `Wrap<${Component.displayName || Component.name || name}>`
 
   return Wrapped
 }
@@ -264,17 +265,28 @@ export type StyledProps <T extends string> = {
 /**
  * Create a HOC for styles.
  */
-export function styled <T extends string> (styleSheet: Styled<T>) {
+export function styled <T extends string> (styleSheet: Styled<T>, hash?: FreeStyle.HashFunction, debug?: boolean) {
   const styles: StylesProp<T> = Object.create(null)
-  const Style = create()
+  const Style = create(hash, debug)
 
   for (const key of Object.keys(styleSheet)) {
     styles[key] = Style.registerStyle(styleSheet[key])
   }
 
   return <P> (Component: React.ComponentType<P & StyledProps<T>>) => {
-    return Object.assign(wrap((props: P, { freeStyle }: any) => {
-      return React.createElement(Component as any, Object.assign({}, props, { styles, freeStyle }))
-    }, Style), { Style, styles })
+    const Styled: React.StatelessComponent<P> = (props: P) => {
+      return React.createElement(
+        StyleComponent,
+        { Style: Style },
+        React.createElement(
+          Component as any,
+          Object.assign({}, props, { styles })
+        )
+      )
+    }
+
+    Styled.displayName = `Styled<${Component.displayName || Component.name || 'anonymous'}>`
+
+    return Object.assign(Styled, { Style, styles })
   }
 }
