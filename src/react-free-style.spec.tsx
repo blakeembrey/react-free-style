@@ -211,22 +211,24 @@ describe('react free style', function () {
   })
 
   it('should work as a hoc', () => {
-    const Component = styled({
+    const withStyle = styled({
       button: {
         color: 'red'
       }
-    })(Object.assign((props: any, context: any) => {
+    })
+
+    const Component = withStyle(Object.assign((props: any, context: any) => {
       context.freeStyle.registerCss({ body: { color: 'blue' } })
 
       return <div className={props.styles.button}>Test</div>
     }, { contextTypes: ReactFreeStyleContext }))
 
     expect(renderToStaticMarkup(React.createElement(Component))).to.equal(
-      '<div class="' + Component.styles.button + '">Test</div>'
+      '<div class="' + withStyle.styles.button + '">Test</div>'
     )
 
     expect(rewind().toString()).to.equal(
-      `<style data-react-free-style="true">.${Component.styles.button}{color:red}body{color:blue}</style>`
+      `<style data-react-free-style="true">.${withStyle.styles.button}{color:red}body{color:blue}</style>`
     )
   })
 })

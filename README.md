@@ -85,7 +85,7 @@ const css = styles.toCss()
 
 ### HOC
 
-The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
+The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` prop to the component.
 
 ```js
 const withStyle = styled({
@@ -94,13 +94,13 @@ const withStyle = styled({
   }
 })
 
-export default withStyle(props => {
-  props.freeStyle.registerCss({
-    html: {
-      color: '#111'
-    }
-  })
+withStyle.Style.registerCss({
+  html: {
+    color: '#111'
+  }
+})
 
+export default withStyle(props => {
   return <button className={props.styles.button}>Test</button>
 })
 ```

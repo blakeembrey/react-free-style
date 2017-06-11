@@ -268,7 +268,7 @@ export function styled <T extends string> (styleSheet: StyleSheet<T> = {} as Sty
   const Style = create(hash, debug)
   const styles = registerStyleSheet(Style, styleSheet)
 
-  return <P> (Component: React.ComponentType<P & StyledProps<T>>) => {
+  return Object.assign(<P> (Component: React.ComponentType<P & StyledProps<T>>) => {
     const Styled: React.StatelessComponent<P> = (props: P) => {
       return React.createElement(
         StyleComponent,
@@ -282,6 +282,6 @@ export function styled <T extends string> (styleSheet: StyleSheet<T> = {} as Sty
 
     Styled.displayName = `Styled<${Component.displayName || Component.name || 'anonymous'}>`
 
-    return Object.assign(Styled, { Style, styles })
-  }
+    return Styled
+  }, { Style, styles })
 }
