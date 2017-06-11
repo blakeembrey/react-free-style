@@ -2,8 +2,9 @@
 
 import { expect } from 'chai'
 import * as React from 'react'
+import PropTypes = require('prop-types')
 import { renderToStaticMarkup } from 'react-dom/server'
-import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext } from './react-free-style'
+import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext, stylize } from './react-free-style'
 
 describe('react free style', function () {
   let TestStyle: FreeStyle.FreeStyle
@@ -17,9 +18,7 @@ describe('react free style', function () {
       backgroundColor: 'red'
     })
 
-    const Component = React.createClass({
-
-      displayName: 'App',
+    class Component extends React.Component<{}, {}> {
 
       render () {
         return React.createElement(
@@ -33,7 +32,7 @@ describe('react free style', function () {
         )
       }
 
-    })
+    }
 
     const App = wrap(Component, TestStyle)
 
@@ -57,7 +56,7 @@ describe('react free style', function () {
     class ButtonComponent extends React.Component<{ style: any }, {}> {
 
       static contextTypes = {
-        freeStyle: React.PropTypes.object.isRequired
+        freeStyle: PropTypes.object.isRequired
       }
 
       inlineStyle: string
@@ -80,7 +79,7 @@ describe('react free style', function () {
 
     }
 
-    const Component = React.createClass({
+    class Component extends React.Component<{}, {}> {
 
       render () {
         return React.createElement(
@@ -94,7 +93,7 @@ describe('react free style', function () {
         )
       }
 
-    })
+    }
 
     const App = wrap(Component, TestStyle)
 
@@ -122,7 +121,7 @@ describe('react free style', function () {
     })
 
     const Button = wrap(
-      React.createClass({
+      class extends React.Component<{}, {}> {
 
         render () {
           return React.createElement(
@@ -132,11 +131,11 @@ describe('react free style', function () {
           )
         }
 
-      }),
+      },
       NestedStyle
     )
 
-    const Child = React.createClass({
+    class Child extends React.Component<{}, {}> {
 
       render () {
         return React.createElement(
@@ -146,10 +145,10 @@ describe('react free style', function () {
         )
       }
 
-    })
+    }
 
     const App = wrap(
-      React.createClass({
+      class extends React.Component<{}, {}> {
 
         render () {
           return React.createElement(
@@ -159,7 +158,7 @@ describe('react free style', function () {
           )
         }
 
-      }),
+      },
       TestStyle
     )
 
@@ -190,7 +189,7 @@ describe('react free style', function () {
     }
 
     ChildComponent.contextTypes = {
-      freeStyle: React.PropTypes.object.isRequired
+      freeStyle: PropTypes.object.isRequired
     }
 
     const Child = wrap(ChildComponent)
@@ -208,6 +207,26 @@ describe('react free style', function () {
 
     expect(rewind().toString()).to.equal(
       `<style data-react-free-style="true">.${appStyle}{background:red}.${inlineStyle}{color:blue}</style>`
+    )
+  })
+
+  it('should work as a hoc', () => {
+    const Component = stylize({
+      button: {
+        color: 'red'
+      }
+    })(Object.assign((props: any, context: any) => {
+      context.freeStyle.registerCss({ body: { color: 'blue' } })
+
+      return <div className={props.styles.button}>Test</div>
+    }, { contextTypes: ReactFreeStyleContext }))
+
+    expect(renderToStaticMarkup(React.createElement(Component))).to.equal(
+      '<div class="' + Component.styles.button + '">Test</div>'
+    )
+
+    expect(rewind().toString()).to.equal(
+      `<style data-react-free-style="true">.${Component.styles.button}{color:red}body{color:blue}</style>`
     )
   })
 })

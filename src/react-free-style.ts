@@ -80,6 +80,13 @@ export class StyleContext {
     this.global.changed()
   }
 
+  registerCss (styles: FreeStyle.Styles) {
+    this.global.style.unmerge(this.style)
+    this.style.registerCss(styles)
+    this.global.style.merge(this.style)
+    this.global.changed()
+  }
+
   mount () {
     this.global.style.merge(this.style)
     this.global.changed()
@@ -118,32 +125,30 @@ export function rewind () {
 /**
  * The interface for "peeking" results.
  */
-export interface Peek {
-  toComponent (): React.DOMElement<{}, HTMLStyleElement>
-  toString (): string
-  toCss (): string
+export class Peek {
+  constructor (public css: string) {}
+
+  toComponent () {
+    return React.createElement('style', {
+      [STYLE_ATTRIBUTE]: true,
+      dangerouslySetInnerHTML: { __html: this.css }
+    })
+  }
+
+  toString () {
+    return `<style ${STYLE_ATTRIBUTE}="true">${this.css}</style>`
+  }
+
+  toCss () {
+    return this.css
+  }
 }
 
 /**
  * Peek at the current styles without clearing.
  */
 export function peek (): Peek {
-  const css = global.style.getStyles()
-
-  return {
-    toComponent () {
-      return React.createElement('style', {
-        [STYLE_ATTRIBUTE]: true,
-        dangerouslySetInnerHTML: { __html: css }
-      })
-    },
-    toString () {
-      return `<style ${STYLE_ATTRIBUTE}="true">${css}</style>`
-    },
-    toCss () {
-      return css
-    }
-  }
+  return new Peek(global.style.getStyles())
 }
 
 /**
@@ -151,6 +156,13 @@ export function peek (): Peek {
  */
 export interface StyleProps {
   style?: FreeStyle.FreeStyle
+}
+
+/**
+ * The free-style context object for React.
+ */
+export const ReactFreeStyleContext = {
+  freeStyle: PropTypes.object.isRequired
 }
 
 /**
@@ -167,14 +179,12 @@ export class Style extends React.Component<StyleProps, {}> {
 
   static displayName = 'Style'
 
-  static propsTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
+  static propsTypes = {
     style: PropTypes.object.isRequired,
     children: PropTypes.node.isRequired
   }
 
-  static childContextTypes: PropTypes.ValidationMap<PropTypes.Validator<any>> = {
-    freeStyle: PropTypes.object.isRequired
-  }
+  static childContextTypes = ReactFreeStyleContext
 
   _freeStyle = new StyleContext(global)
 
@@ -201,7 +211,7 @@ export class Style extends React.Component<StyleProps, {}> {
   }
 
   render () {
-    return React.Children.only(this.props.children as any)
+    return React.Children.only(this.props.children)
   }
 
 }
@@ -209,12 +219,12 @@ export class Style extends React.Component<StyleProps, {}> {
 /**
  * Wrap a component instead of adding it to the markup manually.
  */
-export function wrap <T> (
-  Component: React.ComponentClass<T> | React.StatelessComponent<T>,
+export function wrap <P> (
+  Component: React.ComponentType<P>,
   style?: FreeStyle.FreeStyle
 ) {
-  return function (props: T, context: any) {
-    return React.createElement(Style, { style }, React.createElement(Component, props))
+  return (props: P) => {
+    return React.createElement(Style, { style }, React.createElement(Component as any, props))
   }
 }
 
@@ -223,4 +233,44 @@ export function wrap <T> (
  */
 export function create (hash?: FreeStyle.HashFunction, debug?: boolean) {
   return FreeStyle.create(hash, debug)
+}
+
+/**
+ * Input object for style HOC.
+ */
+export type Stylize <T extends string> = {
+  [K in T]: FreeStyle.Styles
+}
+
+/**
+ * Styles as a component prop.
+ */
+export type StylesProp <T extends string> = {
+  [K in T]: string
+}
+
+/**
+ * Props passed to the HOC child.
+ */
+export type StylizeProps <T extends string> = {
+  styles: StylesProp<T>
+  freeStyle: StyleContext
+}
+
+/**
+ * Create a HOC for styles.
+ */
+export function stylize <T extends string> (styleSheet: Stylize<T>) {
+  const styles: StylesProp<T> = Object.create(null)
+  const Style = create()
+
+  for (const key of Object.keys(styleSheet)) {
+    styles[key] = Style.registerStyle(styleSheet[key])
+  }
+
+  return <P> (Component: React.ComponentType<P & StylizeProps<T>>) => {
+    return Object.assign(wrap((props: P, { freeStyle }: any) => {
+      return React.createElement(Component as any, Object.assign({}, props, { styles, freeStyle }))
+    }, Style), { Style, styles })
+  }
 }

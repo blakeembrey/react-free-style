@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "lib": ["es2015", "dom"],
     "outDir": "dist",
+    "rootDir": "src/",
     "module": "commonjs",
     "declaration": true,
     "noImplicitAny": true,
@@ -10,9 +12,5 @@
     "jsx": "react",
     "sourceMap": true,
     "inlineSources": true
-  },
-  "include": [
-    "src/**/*",
-    "typings/**/*"
-  ]
+  }
 }

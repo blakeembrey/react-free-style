@@ -15,7 +15,7 @@
     "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
     "test-cov": "istanbul cover -x dist/**/*.spec.js node_modules/mocha/bin/_mocha -- dist/**/*.spec.js -R spec --bail",
     "test": "npm run build && npm run lint && npm run test-cov",
-    "prepublish": "typings install && npm run build"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,11 @@
   },
   "homepage": "https://github.com/blakeembrey/react-free-style",
   "devDependencies": {
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^2.2.41",
     "@types/prop-types": "^15.5.1",
+    "@types/react": "^15.0.27",
+    "@types/react-dom": "^15.5.0",
     "chai": "^4.0.0",
     "istanbul": "^0.4.1",
     "mocha": "^3.1.0",
@@ -43,8 +47,7 @@
     "react-dom": "^15.0.2",
     "tslint": "^5.2.0",
     "tslint-config-standard": "^5.0.2",
-    "typescript": "^2.3.2",
-    "typings": "^2.1.1"
+    "typescript": "^2.3.2"
   },
   "dependencies": {
     "free-style": "^2.3.1",

@@ -27,31 +27,15 @@ npm install react-free-style --save
 ## Usage
 
 ```js
-import * as ReactFreeStyle from 'react-free-style'
+import { stylize } from 'react-free-style'
 
-// Create a style instance for the component.
-const Style = ReactFreeStyle.create()
-
-// Register some styles.
-var textStyle = Style.registerStyle({
-  backgroundColor: 'red'
-})
-
-// Create a React component (in the browser, styles are inserted into `<head />`).
-var App = React.createClass({
-
-  render: function () {
-    return (
-      <div className={textStyle}>
-        Hello world!
-      </div>
-    )
+const App = stylize({
+  text: {
+    backgroundColor: 'red'
   }
-
+})((props) => {
+  return <div className={props.styles.text}>Hello world!</div>
 })
-
-// Wrap `App` with the styles to render them together.
-App = ReactFreeStyle.wrap(App, Style)
 
 // Render the application to the document.
 React.render(<App />, document.body)
@@ -99,7 +83,33 @@ const html = `
 const css = styles.toCss()
 ```
 
-### Styles
+### HOC
+
+The `stylize` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
+
+```js
+const style = stylize({
+  button: {
+    color: 'red'
+  }
+})
+
+export default style(props => {
+  props.freeStyle.registerCss({
+    html: {
+      color: '#111'
+    }
+  })
+
+  return <button className={props.styles.button}>Test</button>
+})
+```
+
+**Tip:** `Style` and `styles` are properties of the HOC function so you can alter the styles (e.g. `registerKeyframes`, `registerCss`) before rendering.
+
+### Free-Style Methods
+
+#### Styles
 
 Register a [style](https://github.com/blakeembrey/free-style#styles).
 
@@ -110,7 +120,7 @@ Style.registerStyle({
 })
 ```
 
-### Keyframes
+#### Keyframes
 
 Register [keyframes](https://github.com/blakeembrey/free-style#keyframes).
 
@@ -125,7 +135,7 @@ Style.registerKeyframes({
 })
 ```
 
-### Rules
+#### Rules
 
 Register [rule](https://github.com/blakeembrey/free-style#rules).
 
@@ -137,7 +147,7 @@ Style.registerRule('@media print', {
 })
 ```
 
-### Dynamical Styles, Keyframes and Rules
+#### Dynamical Styles (Or how the HOC works)
 
 ```js
 class MyComponent extends React.Component {
@@ -166,7 +176,7 @@ class MyComponent extends React.Component {
 export default wrap(MyComponent)
 ```
 
-#### With Stateless React Components
+##### And With Stateless React Components
 
 ```js
 const MyComponent = (props, context) => {
