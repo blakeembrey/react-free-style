@@ -128,7 +128,7 @@ export const styles = registerStyleSheet(Style, {
 
 ### Free-Style Methods
 
-Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on the `context.freeStyle` and the result of `create()` (which is a `free-style` instance).
+Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on `context.freeStyle`, `styled().Style` or `create()`.
 
 ### Dynamical Styles Using Context
 
