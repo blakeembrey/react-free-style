@@ -107,11 +107,30 @@ export default withStyle(props => {
 
 **Tip:** `Style` and `styles` are properties of the HOC function so you can alter the styles (e.g. `registerKeyframes`, `registerCss`) before rendering.
 
+### `registerStyleSheet`
+
+Exports a small helper function for registering a map of styles (e.g. `styled`).
+
+```js
+import { create, registerStyleSheet } from 'react-free-style'
+
+const Style = FreeStyle.create()
+
+export const styles = registerStyleSheet(Style, {
+  button: {
+    color: 'red'
+  },
+  text: {
+    color: 'blue'
+  }
+})
+```
+
 ### Free-Style Methods
 
 Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on the `context.freeStyle` and the result of `create()` (which is a `free-style` instance).
 
-### Dynamical Styles (Or how the HOC works)
+### Dynamical Styles Using Context
 
 ```js
 import { wrap, ReactFreeStyleContext } from 'react-free-style'
@@ -143,7 +162,7 @@ export default wrap(MyComponent)
 #### And With Stateless React Components
 
 ```js
-import { wrap, ReactFreeStyleContext } from 'react-free-style'
+import { styled, ReactFreeStyleContext } from 'react-free-style'
 
 const MyComponent = (props, context) => {
   const className = context.freeStyle.registerStyle({ color: 'blue' })
@@ -153,7 +172,7 @@ const MyComponent = (props, context) => {
 
 MyComponent.contextTypes = ReactFreeStyleContext
 
-export default wrap(MyComponent)
+export default styled()(MyComponent)
 ```
 
 ## License
