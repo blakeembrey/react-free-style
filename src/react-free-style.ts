@@ -21,8 +21,8 @@ export const canUseDOM = !!(
  */
 export class GlobalStyleContext {
 
-  style = create()
-  prevChangeId = this.style.changeId
+  Style = create()
+  prevChangeId = this.Style.changeId
   element: HTMLStyleElement
 
   constructor () {
@@ -40,63 +40,69 @@ export class GlobalStyleContext {
   }
 
   changed () {
-    if (canUseDOM && this.style.changeId !== this.prevChangeId) {
-      this.prevChangeId = this.style.changeId
-      this.element.textContent = this.style.getStyles()
+    if (canUseDOM && this.Style.changeId !== this.prevChangeId) {
+      this.prevChangeId = this.Style.changeId
+      this.element.textContent = this.Style.getStyles()
     }
   }
 
 }
 
 /**
- * The style context object is passed to the child context to allow dynamic styles.
+ * Object used for dynamic styles over the context.
  */
-export class StyleContext {
+export type StyleContext = Pick<
+  FreeStyle.FreeStyle,
+  'registerStyle' | 'registerCss' | 'registerHashRule' | 'registerKeyframes' | 'registerRule'
+> & {
+  Style: FreeStyle.FreeStyle
+  mount (): void
+  unmount (): void
+}
 
-  Style = create()
+/**
+ * Create the context object for style components.
+ */
+export function createStyleContext (global: GlobalStyleContext): StyleContext {
+  const Style = create()
 
-  constructor (public global: GlobalStyleContext) {}
-
-  registerStyle (styles: FreeStyle.Styles, displayName?: string) {
-    this.global.style.unmerge(this.Style)
-    const className = this.Style.registerStyle(styles, displayName)
-    this.global.style.merge(this.Style)
-    this.global.changed()
-    return className
+  function mount () {
+    global.Style.merge(Style)
+    global.changed()
   }
 
-  registerKeyframes (styles: FreeStyle.Styles, displayName?: string) {
-    this.global.style.unmerge(this.Style)
-    const keyframes = this.Style.registerKeyframes(styles, displayName)
-    this.global.style.merge(this.Style)
-    this.global.changed()
-    return keyframes
+  function unmount () {
+    global.Style.unmerge(Style)
+    global.changed()
   }
 
-  registerRule (rule: string, styles: FreeStyle.Styles) {
-    this.global.style.unmerge(this.Style)
-    this.Style.registerRule(rule, styles)
-    this.global.style.merge(this.Style)
-    this.global.changed()
+  function wrap <T> (invoke: () => T): T {
+    unmount()
+    const result = invoke()
+    mount()
+    return result
   }
 
-  registerCss (styles: FreeStyle.Styles) {
-    this.global.style.unmerge(this.Style)
-    this.Style.registerCss(styles)
-    this.global.style.merge(this.Style)
-    this.global.changed()
+  return {
+    registerStyle (styles: FreeStyle.Styles, displayName?: string) {
+      return wrap(() => Style.registerStyle(styles, displayName))
+    },
+    registerCss (css: FreeStyle.Styles) {
+      return wrap(() => Style.registerCss(css))
+    },
+    registerHashRule (prefix: string, styles: FreeStyle.Styles, displayName?: string) {
+      return wrap(() => Style.registerHashRule(prefix, styles, displayName))
+    },
+    registerKeyframes (keyframes: FreeStyle.Styles, displayName?: string) {
+      return wrap(() => Style.registerKeyframes(keyframes, displayName))
+    },
+    registerRule (rule: string, styles: FreeStyle.Styles) {
+      return wrap(() => Style.registerRule(rule, styles))
+    },
+    Style: Style,
+    mount: mount,
+    unmount: unmount
   }
-
-  mount () {
-    this.global.style.merge(this.Style)
-    this.global.changed()
-  }
-
-  unmount () {
-    this.global.style.unmerge(this.Style)
-    this.global.changed()
-  }
-
 }
 
 /**
@@ -148,7 +154,7 @@ export class Peek {
  * Peek at the current styles without clearing.
  */
 export function peek (): Peek {
-  return new Peek(global.style.getStyles())
+  return new Peek(global.Style.getStyles())
 }
 
 /**
@@ -186,7 +192,7 @@ export class StyleComponent extends React.Component<StyleProps, {}> {
 
   static childContextTypes = ReactFreeStyleContext
 
-  _freeStyle = new StyleContext(global)
+  _freeStyle = createStyleContext(global)
 
   getChildContext (): ReactFreeStyleContext {
     return {
@@ -243,35 +249,43 @@ export function create (hash?: FreeStyle.HashFunction, debug?: boolean) {
 /**
  * Input object for style HOC.
  */
-export type Styled <T extends string> = {
+export type StyleSheet <T extends string> = {
   [K in T]: FreeStyle.Styles
 }
 
 /**
  * Styles as a component prop.
  */
-export type StylesProp <T extends string> = {
+export type StyleMap <T extends string> = {
   [K in T]: string
+}
+
+/**
+ * Utility for registering a map of styles.
+ */
+export function registerStyleSheet <T extends string> (Style: FreeStyle.FreeStyle, styleSheet: StyleSheet<T>): StyleMap<T> {
+  const styles: StyleMap<T> = Object.create(null)
+
+  for (const key of Object.keys(styleSheet)) {
+    styles[key] = Style.registerStyle(styleSheet[key])
+  }
+
+  return styles
 }
 
 /**
  * Props passed to the HOC child.
  */
 export type StyledProps <T extends string> = {
-  styles: StylesProp<T>
-  freeStyle: StyleContext
+  styles: StyleMap<T>
 }
 
 /**
  * Create a HOC for styles.
  */
-export function styled <T extends string> (styleSheet: Styled<T>, hash?: FreeStyle.HashFunction, debug?: boolean) {
-  const styles: StylesProp<T> = Object.create(null)
+export function styled <T extends string> (styleSheet: StyleSheet<T>, hash?: FreeStyle.HashFunction, debug?: boolean) {
   const Style = create(hash, debug)
-
-  for (const key of Object.keys(styleSheet)) {
-    styles[key] = Style.registerStyle(styleSheet[key])
-  }
+  const styles = registerStyleSheet(Style, styleSheet)
 
   return <P> (Component: React.ComponentType<P & StyledProps<T>>) => {
     const Styled: React.StatelessComponent<P> = (props: P) => {
