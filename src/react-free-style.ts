@@ -264,7 +264,7 @@ export type StyledProps <T extends string> = {
 /**
  * Create a HOC for styles.
  */
-export function styled <T extends string> (styleSheet: StyleSheet<T>, hash?: FreeStyle.HashFunction, debug?: boolean) {
+export function styled <T extends string> (styleSheet: StyleSheet<T> = {} as StyleSheet<T>, hash?: FreeStyle.HashFunction, debug?: boolean) {
   const Style = create(hash, debug)
   const styles = registerStyleSheet(Style, styleSheet)
 
