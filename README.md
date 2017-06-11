@@ -162,7 +162,7 @@ export default wrap(MyComponent)
 #### And With Stateless React Components
 
 ```js
-import { styled, ReactFreeStyleContext } from 'react-free-style'
+import { wrap, ReactFreeStyleContext } from 'react-free-style'
 
 const MyComponent = (props, context) => {
   const className = context.freeStyle.registerStyle({ color: 'blue' })
@@ -172,7 +172,7 @@ const MyComponent = (props, context) => {
 
 MyComponent.contextTypes = ReactFreeStyleContext
 
-export default styled()(MyComponent)
+export default wrap(MyComponent)
 ```
 
 ## License

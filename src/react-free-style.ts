@@ -1,6 +1,12 @@
 import React = require('react')
 import PropTypes = require('prop-types')
 import * as FreeStyle from 'free-style'
+import { create } from 'free-style'
+
+/**
+ * Re-export the `free-style` module.
+ */
+export { FreeStyle, create }
 
 /**
  * Tag the element for rendering later.
@@ -106,11 +112,6 @@ export function createStyleContext (global: GlobalStyleContext): StyleContext {
 }
 
 /**
- * Re-export the `free-style` module.
- */
-export { FreeStyle }
-
-/**
  * Create a global style container.
  */
 let global = new GlobalStyleContext()
@@ -120,7 +121,7 @@ let global = new GlobalStyleContext()
  */
 export function rewind () {
   if (canUseDOM) {
-    throw new Error('You can only call `rewind()` on the server. Call `peek()` to read the current styles.')
+    throw new TypeError('You must call `rewind()` on the server. Call `peek()` to read the current styles.')
   }
 
   const styles = peek()
@@ -158,13 +159,6 @@ export function peek (): Peek {
 }
 
 /**
- * Style properties.
- */
-export interface StyleProps {
-  Style?: FreeStyle.FreeStyle
-}
-
-/**
  * The free-style context object for React.
  */
 export const ReactFreeStyleContext = {
@@ -181,15 +175,9 @@ export interface ReactFreeStyleContext {
 /**
  * Create a style component.
  */
-export class StyleComponent extends React.Component<StyleProps, {}> {
+export class StyleComponent extends React.Component<{ Style?: FreeStyle.FreeStyle }, {}> {
 
   static displayName = 'Style'
-
-  static propsTypes = {
-    Style: PropTypes.object.isRequired,
-    children: PropTypes.node.isRequired
-  }
-
   static childContextTypes = ReactFreeStyleContext
 
   _freeStyle = createStyleContext(global)
@@ -240,13 +228,6 @@ export function wrap <P> (
 }
 
 /**
- * Create a Free Style instance.
- */
-export function create (hash?: FreeStyle.HashFunction, debug?: boolean) {
-  return FreeStyle.create(hash, debug)
-}
-
-/**
  * Input object for style HOC.
  */
 export type StyleSheet <T extends string> = {
@@ -291,7 +272,7 @@ export function styled <T extends string> (styleSheet: StyleSheet<T>, hash?: Fre
     const Styled: React.StatelessComponent<P> = (props: P) => {
       return React.createElement(
         StyleComponent,
-        { Style: Style },
+        { Style },
         React.createElement(
           Component as any,
           Object.assign({}, props, { styles })
