@@ -223,9 +223,13 @@ export function wrap <P> (
   Component: React.ComponentType<P>,
   style?: FreeStyle.FreeStyle
 ) {
-  return (props: P) => {
+  const Wrapped: React.StatelessComponent<P> = (props: P) => {
     return React.createElement(Style, { style }, React.createElement(Component as any, props))
   }
+
+  Wrapped.displayName = `Style<${Component.displayName || Component.name || 'anonymous'}>`
+
+  return Wrapped
 }
 
 /**
