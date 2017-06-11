@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import * as React from 'react'
 import PropTypes = require('prop-types')
 import { renderToStaticMarkup } from 'react-dom/server'
-import { create, Style, wrap, rewind, FreeStyle, ReactFreeStyleContext, styled } from './react-free-style'
+import { create, StyleComponent, wrap, rewind, FreeStyle, ReactFreeStyleContext, styled } from './react-free-style'
 
 describe('react free style', function () {
   let TestStyle: FreeStyle.FreeStyle
@@ -22,8 +22,8 @@ describe('react free style', function () {
 
       render () {
         return React.createElement(
-          Style,
-          { style: TestStyle },
+          StyleComponent,
+          { Style: TestStyle },
           React.createElement(
             'div',
             { className: textStyle },
