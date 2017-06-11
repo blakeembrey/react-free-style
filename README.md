@@ -88,13 +88,13 @@ const css = styles.toCss()
 The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
 
 ```js
-const style = styled({
+const withStyle = styled({
   button: {
     color: 'red'
   }
 })
 
-export default style(props => {
+export default withStyle(props => {
   props.freeStyle.registerCss({
     html: {
       color: '#111'
@@ -109,55 +109,19 @@ export default style(props => {
 
 ### Free-Style Methods
 
-#### Styles
+Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on the `context.freeStyle` and the result of `create()` (which is a `free-style` instance).
 
-Register a [style](https://github.com/blakeembrey/free-style#styles).
-
-```js
-Style.registerStyle({
-  backgroundColor: 'red',
-  padding: 10
-})
-```
-
-#### Keyframes
-
-Register [keyframes](https://github.com/blakeembrey/free-style#keyframes).
+### Dynamical Styles (Or how the HOC works)
 
 ```js
-Style.registerKeyframes({
-  from: {
-    color: 'red'
-  },
-  to: {
-    color: 'blue'
-  }
-})
-```
+import { wrap, ReactFreeStyleContext } from 'react-free-style'
 
-#### Rules
-
-Register [rule](https://github.com/blakeembrey/free-style#rules).
-
-```js
-Style.registerRule('@media print', {
-  body: {
-    color: 'red'
-  }
-})
-```
-
-#### Dynamical Styles (Or how the HOC works)
-
-```js
 class MyComponent extends React.Component {
 
-  static contextTypes = {
-    freeStyle: React.PropTypes.object.isRequired
-  }
+  static contextTypes = ReactFreeStyleContext
 
   componentWillMount () {
-    // Also has `registerKeyframes` and `registerRule` methods.
+    // Or: `registerKeyframes`, `registerRule`, `registerCss`.
     this.inlineClassName = this.context.freeStyle.registerStyle(this.props.style)
   }
 
@@ -176,18 +140,18 @@ class MyComponent extends React.Component {
 export default wrap(MyComponent)
 ```
 
-##### And With Stateless React Components
+#### And With Stateless React Components
 
 ```js
+import { wrap, ReactFreeStyleContext } from 'react-free-style'
+
 const MyComponent = (props, context) => {
-  inlineStyle = context.freeStyle.registerStyle({ color: 'blue' })
+  const className = context.freeStyle.registerStyle({ color: 'blue' })
 
-  return <span className={inlineStyle}>hello world</span>
+  return <span className={className}>hello world</span>
 }
 
-MyComponent.contextTypes = {
-  freeStyle: React.PropTypes.object.isRequired
-}
+MyComponent.contextTypes = ReactFreeStyleContext
 
 export default wrap(MyComponent)
 ```
