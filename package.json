@@ -46,7 +46,7 @@
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
     "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2",
+    "tslint-config-standard": "^6.0.0",
     "typescript": "^2.3.2"
   },
   "dependencies": {
