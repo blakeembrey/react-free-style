@@ -132,10 +132,16 @@ export const styles = registerStyleSheet(Style, {
 
 Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on `context.freeStyle`, `styled().Style` or `create()`.
 
-### Dynamical Styles Using Context
+### Using `wrap(...)`
 
 ```js
-import { wrap, ReactFreeStyleContext } from 'react-free-style'
+import { wrap, create, ReactFreeStyleContext } from 'react-free-style'
+
+const Style = create()
+
+const myClassName = Style.registerStyle({
+  color: 'red'
+})
 
 class MyComponent extends React.Component {
 
@@ -150,7 +156,8 @@ class MyComponent extends React.Component {
     return React.createElement(
       'button',
       {
-        className: this.inlineClassName
+        // Class names from `props`, component `Style` and "inline" context.
+        className: `${this.props.className} ${myClassName} ${this.inlineClassName}`
       },
       this.props.children
     )
@@ -158,7 +165,7 @@ class MyComponent extends React.Component {
 
 }
 
-export default wrap(MyComponent)
+export default wrap(MyComponent, Style)
 ```
 
 #### And With Stateless React Components
