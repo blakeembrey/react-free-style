@@ -172,10 +172,14 @@ export interface ReactFreeStyleContext {
   freeStyle: StyleContext
 }
 
+export interface StyleComponentProps {
+  Style: FreeStyle.FreeStyle
+}
+
 /**
  * Create a style component.
  */
-export class StyleComponent extends React.Component<{ Style?: FreeStyle.FreeStyle }, {}> {
+export class StyleComponent extends React.Component<StyleComponentProps, {}> {
 
   static displayName = 'Style'
   static childContextTypes = ReactFreeStyleContext
@@ -188,19 +192,22 @@ export class StyleComponent extends React.Component<{ Style?: FreeStyle.FreeStyl
     }
   }
 
-  componentWillMount () {
-    if (this.props.Style) {
-      this._freeStyle.Style.merge(this.props.Style)
-    }
+  componentWillUpdate (nextProps: StyleComponentProps) {
+    if (this.props.Style.id === nextProps.Style.id) return
 
+    this._freeStyle.unmount()
+    this._freeStyle.Style.unmerge(this.props.Style)
+    this._freeStyle.Style.merge(nextProps.Style)
+    this._freeStyle.mount()
+  }
+
+  componentWillMount () {
+    this._freeStyle.Style.merge(this.props.Style)
     this._freeStyle.mount()
   }
 
   componentWillUnmount () {
-    if (this.props.Style) {
-      this._freeStyle.Style.unmerge(this.props.Style)
-    }
-
+    this._freeStyle.Style.unmerge(this.props.Style)
     this._freeStyle.unmount()
   }
 
@@ -215,7 +222,7 @@ export class StyleComponent extends React.Component<{ Style?: FreeStyle.FreeStyl
  */
 export function wrap <P> (
   Component: React.ComponentType<P>,
-  Style?: FreeStyle.FreeStyle,
+  Style: FreeStyle.FreeStyle = create(),
   name = 'anonymous'
 ) {
   const Wrapped: React.StatelessComponent<P> = (props: P) => {
