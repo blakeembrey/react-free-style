@@ -11,6 +11,12 @@ describe('react free style', function () {
       text: {
         backgroundColor: 'red'
       }
+    }, {
+      css: {
+        '*': {
+          boxSizing: 'border-box'
+        }
+      }
     })
 
     const App = withStyles((props) => {
@@ -22,7 +28,7 @@ describe('react free style', function () {
     )
 
     expect(rewind().toString()).to.equal(
-      `<style data-react-free-style="true">.${withStyles.styles.text}{background-color:red}</style>`
+      `<style data-react-free-style="true">.${withStyles.styles.text}{background-color:red}*{box-sizing:border-box}</style>`
     )
   })
 

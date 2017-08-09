@@ -240,7 +240,7 @@ export function styled <T extends string> (
   debug?: boolean
 ) {
   const Style = FreeStyle.create(hash, debug)
-  const styles = helpers.registerStyleSheet(Style, sheet)
+  const styles = helpers.registerStyleSheet(Style, sheet, options)
 
   return Object.assign(<P> (Component: React.ComponentType<P & StyledComponentProps<T>>) => {
     const Styled: React.StatelessComponent<P> = (props: P & StyledProps<T>) => {
