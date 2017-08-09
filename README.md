@@ -41,6 +41,8 @@ const App = styled({
 React.render(<App />, document.body)
 ```
 
+Exports [`helpers`](https://github.com/blakeembrey/style-helper) and [`FreeStyle`](https://github.com/blakeembrey/free-style). Supports options from [`registerStyleSheet`](https://github.com/blakeembrey/style-helper#register-style-sheet) in `styled(sheet, options?, hash?, debug?)`.
+
 ### Server Usage
 
 ```js
@@ -85,7 +87,7 @@ const css = styles.toCss()
 
 ### HOC
 
-The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` prop to the component.
+The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
 
 ```js
 const withStyle = styled({
@@ -107,37 +109,18 @@ export default withStyle(props => {
 })
 ```
 
-**Tip:** `Style` and `styles` are properties of the HOC function so you can alter the styles (e.g. `registerKeyframes`, `registerCss`) before rendering.
-
-### `registerStyleSheet`
-
-Exports a small helper function for registering a map of styles (e.g. `styled`).
-
-```js
-import { create, registerStyleSheet } from 'react-free-style'
-
-const Style = FreeStyle.create()
-
-export const styles = registerStyleSheet(Style, {
-  button: {
-    color: 'red'
-  },
-  text: {
-    color: 'blue'
-  }
-})
-```
+**P.S.** The `styles` property will merge with any styles passed in the props. If you don't want this feature, use the `styles` object on `withStyles` HOC instead of `props`.
 
 ### Free-Style Methods
 
-Supports registering a [style](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rule](https://github.com/blakeembrey/free-style#rules) or [CSS object](https://github.com/blakeembrey/free-style#css-object) on `context.freeStyle`, `styled().Style` or `create()`.
+Supports registering [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) or a [CSS object](https://github.com/blakeembrey/free-style#css-object) at runtime.
 
 ### Using `wrap(...)`
 
 ```js
-import { wrap, create, ReactFreeStyleContext } from 'react-free-style'
+import { wrap, FreeStyle } from 'react-free-style'
 
-const Style = create()
+const Style = FreeStyle.create()
 
 const myClassName = Style.registerStyle({
   color: 'red'
@@ -145,19 +128,12 @@ const myClassName = Style.registerStyle({
 
 class MyComponent extends React.Component {
 
-  static contextTypes = ReactFreeStyleContext
-
-  componentWillMount () {
-    // Or: `registerKeyframes`, `registerRule`, `registerCss`.
-    this.inlineClassName = this.context.freeStyle.registerStyle(this.props.style)
-  }
-
   render () {
     return React.createElement(
       'button',
       {
-        // Class names from `props`, component `Style` and "inline" context.
-        className: `${this.props.className} ${myClassName} ${this.inlineClassName}`
+        // Class names from `props`, `Style` and runtime context.
+        className: `${this.props.className} ${myClassName} ${this.props.inlineClassName}`
       },
       this.props.children
     )
@@ -165,23 +141,12 @@ class MyComponent extends React.Component {
 
 }
 
-export default wrap(MyComponent, Style)
-```
-
-#### And With Stateless React Components
-
-```js
-import { wrap, ReactFreeStyleContext } from 'react-free-style'
-
-const MyComponent = (props, context) => {
-  const className = context.freeStyle.registerStyle({ color: 'blue' })
-
-  return <span className={className}>hello world</span>
-}
-
-MyComponent.contextTypes = ReactFreeStyleContext
-
-export default wrap(MyComponent)
+// Change `props` using the style callback.
+export default wrap(MyComponent, Style, (props, freeStyle) => {
+  return Object.assign({}, props, {
+    inlineClassName: freeStyle.registerStyle(props.style)
+  })
+})
 ```
 
 ## License
