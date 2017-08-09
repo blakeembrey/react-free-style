@@ -255,7 +255,7 @@ export function registerStyleSheet <T extends string> (Style: FreeStyle.FreeStyl
   const styles: StyleMap<T> = Object.create(null)
 
   for (const key of Object.keys(styleSheet)) {
-    styles[key] = Style.registerStyle(styleSheet[key])
+    styles[key] = Style.registerStyle(styleSheet[key], key)
   }
 
   return styles
