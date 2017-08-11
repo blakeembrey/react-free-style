@@ -234,7 +234,7 @@ export type StyledComponentProps <T extends string> = {
  * Create a HOC for styles.
  */
 export function styled <T extends string> (
-  sheet: helpers.StyleSheet<T, T> = {} as helpers.StyleSheet<T, T>,
+  sheet: helpers.StyleSheet<T> = {} as helpers.StyleSheet<T>,
   options?: helpers.Options<T>,
   hash?: FreeStyle.HashFunction,
   debug?: boolean
