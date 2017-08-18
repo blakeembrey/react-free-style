@@ -61,8 +61,8 @@ export type StyleContext = Pick<
   'registerStyle' | 'registerCss' | 'registerHashRule' | 'registerKeyframes' | 'registerRule'
 > & {
   Style: FreeStyle.FreeStyle
-  mount (): void
-  unmount (): void
+  mount (silent?: boolean): void
+  unmount (silent?: boolean): void
 }
 
 /**
@@ -71,18 +71,18 @@ export type StyleContext = Pick<
 export function createStyleContext (globalStyle: GlobalStyleContext): StyleContext {
   const Style = FreeStyle.create()
 
-  function mount () {
+  function mount (silent?: boolean) {
     globalStyle.Style.merge(Style)
-    globalStyle.changed()
+    if (!silent) globalStyle.changed()
   }
 
-  function unmount () {
+  function unmount (silent?: boolean) {
     globalStyle.Style.unmerge(Style)
-    globalStyle.changed()
+    if (!silent) globalStyle.changed()
   }
 
   function wrap <T> (invoke: () => T): T {
-    unmount()
+    unmount(true)
     const result = invoke()
     mount()
     return result
@@ -104,9 +104,9 @@ export function createStyleContext (globalStyle: GlobalStyleContext): StyleConte
     registerRule (rule: string, styles: FreeStyle.Styles) {
       return wrap(() => Style.registerRule(rule, styles))
     },
-    Style: Style,
-    mount: mount,
-    unmount: unmount
+    Style,
+    mount,
+    unmount
   }
 }
 
@@ -177,9 +177,21 @@ export class StyleComponent extends React.Component<StyleComponentProps, {}> {
     this.props.freeStyle.mount()
   }
 
-  componentWillUnmount () {
+  componentWillUpdate (nextProps: StyleComponentProps) {
+    if (
+      this.props.freeStyle.Style.id === nextProps.freeStyle.Style.id &&
+      this.props.Style.id === nextProps.Style.id
+    ) return
+
+    this.props.freeStyle.unmount(true)
     this.props.freeStyle.Style.unmerge(this.props.Style)
+    nextProps.freeStyle.Style.merge(nextProps.Style)
+    nextProps.freeStyle.mount()
+  }
+
+  componentWillUnmount () {
     this.props.freeStyle.unmount()
+    this.props.freeStyle.Style.unmerge(this.props.Style)
   }
 
   render () {
