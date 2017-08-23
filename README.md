@@ -85,9 +85,11 @@ const html = `
 const css = styles.toCss()
 ```
 
+**Tip!** If you're hydrating React on the client-side, feel free to remove the server rendered styles _after_ hydration (e.g. `document.head.removeChild(document.getElementById(FreeStyle.STYLE_ID))`).
+
 ### HOC
 
-The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` and `freeStyle` props to the component.
+The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` prop to the component (in addition to existing props).
 
 ```js
 const withStyle = styled({
@@ -109,11 +111,11 @@ export default withStyle(props => {
 })
 ```
 
-**P.S.** The `styles` property will merge with any styles passed in the props. If you don't want this feature, use the `styles` object on `withStyles` HOC instead of `props`.
+**P.S.** The `styles` property will merge with any styles passed into the styled component. If you don't want this feature, use the `styles` object on `withStyles` HOC instead of `props.styles`.
 
 ### Free-Style Methods
 
-Supports registering [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) or a [CSS object](https://github.com/blakeembrey/free-style#css-object) at runtime.
+The second argument to `withStyles` and third argument to `wrap` is `withFreeStyle`. When `true`, `freeStyle` is merged with the component props for inline styles. It supports [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) and [CSS objects](https://github.com/blakeembrey/free-style#css-object) during render/runtime.
 
 ### Using `wrap(...)`
 
@@ -129,6 +131,8 @@ const myClassName = Style.registerStyle({
 class MyComponent extends React.Component {
 
   render () {
+    const inlineClassName = this.props.freeStyle.registerStyle(props.style)
+
     return React.createElement(
       'button',
       {
@@ -142,11 +146,7 @@ class MyComponent extends React.Component {
 }
 
 // Change `props` using the style callback.
-export default wrap(MyComponent, Style, (props, freeStyle) => {
-  return Object.assign({}, props, {
-    inlineClassName: freeStyle.registerStyle(props.style)
-  })
-})
+export default wrap(MyComponent, Style, true)
 ```
 
 ## License

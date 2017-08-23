@@ -3,7 +3,7 @@
 import { expect } from 'chai'
 import * as React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { FreeStyle, StyleComponent, wrap, rewind, styled, StyledComponentProps } from './react-free-style'
+import { FreeStyle, StyleComponent, wrap, rewind, styled, StyledComponentProps, StyleContext, STYLE_ID } from './react-free-style'
 
 describe('react free style', function () {
   it('should render the main example', function () {
@@ -27,9 +27,11 @@ describe('react free style', function () {
       `<div class="${withStyles.styles.text}">Hello world!</div>`
     )
 
-    expect(rewind().toString()).to.equal(
-      `<style data-react-free-style="true">.${withStyles.styles.text}{background-color:red}*{box-sizing:border-box}</style>`
-    )
+    const rewound = rewind()
+    const expectedCss = `.${withStyles.styles.text}{background-color:red}*{box-sizing:border-box}`
+
+    expect(rewound.toCss()).to.equal(expectedCss)
+    expect(rewound.toString()).to.equal(`<style id="${STYLE_ID}">${expectedCss}</style>`)
   })
 
   it('should work with `wrap()`', function () {
@@ -40,15 +42,13 @@ describe('react free style', function () {
       background: 'red'
     })
 
-    const ChildComponent: React.StatelessComponent<{ inlineStyle: string }> = (props) => {
-      return <span className={props.inlineStyle}>hello world</span>
+    const ChildComponent: React.StatelessComponent<{ freeStyle: StyleContext }> = (props) => {
+      inlineStyle = props.freeStyle.registerStyle({ color: 'blue' })
+
+      return <span className={inlineStyle}>hello world</span>
     }
 
-    const Child = wrap(ChildComponent, undefined, (props: {}, freeStyle) => {
-      inlineStyle = freeStyle.registerStyle({ color: 'blue' })
-
-      return Object.assign({}, props, { inlineStyle })
-    })
+    const Child = wrap(ChildComponent, Style, true)
 
     const App = wrap(
       () => <div className={appStyle}><Child /></div>,
@@ -61,8 +61,8 @@ describe('react free style', function () {
       '</div>'
     )
 
-    expect(rewind().toString()).to.equal(
-      `<style data-react-free-style="true">.${appStyle}{background:red}.${inlineStyle}{color:blue}</style>`
+    expect(rewind().toCss()).to.equal(
+      `.${appStyle}{background:red}.${inlineStyle}{color:blue}`
     )
   })
 
@@ -73,18 +73,18 @@ describe('react free style', function () {
       }
     })
 
-    const Component = withStyles((props) => {
+    const Component = withStyles((props: StyledComponentProps<'button'> & { freeStyle: StyleContext }) => {
       props.freeStyle.registerCss({ body: { color: 'blue' } })
 
       return <div className={props.styles.button}>Test</div>
-    })
+    }, true)
 
     expect(renderToStaticMarkup(React.createElement(Component))).to.equal(
       '<div class="' + withStyles.styles.button + '">Test</div>'
     )
 
-    expect(rewind().toString()).to.equal(
-      `<style data-react-free-style="true">.${withStyles.styles.button}{color:red}body{color:blue}</style>`
+    expect(rewind().toCss()).to.equal(
+      `.${withStyles.styles.button}{color:red}body{color:blue}`
     )
   })
 })
