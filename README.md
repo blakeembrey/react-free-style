@@ -95,14 +95,15 @@ The `styled` function accepted a keyed map of styles and maps the styles to clas
 const withStyle = styled({
   button: {
     color: 'red'
-  }
-})
-
-withStyle.Style.registerCss({
-  'html, body': {
-    width: '100%',
-    height: '100%',
-    margin: 0
+  },
+  {
+    css: {
+      'html, body': {
+        width: '100%',
+        height: '100%',
+        margin: 0
+      }
+    }
   }
 })
 
@@ -111,7 +112,7 @@ export default withStyle(props => {
 })
 ```
 
-**P.S.** The `styles` property will merge with any styles passed into the styled component. If you don't want this feature, use the `styles` object on `withStyles` HOC instead of `props.styles`.
+**P.S.** The `styles` property will merge with any styles passed into the styled component. If you don't want this feature, use the `styles` object on `withStyles()` component instead of `props.styles`.
 
 ### Free-Style Methods
 
