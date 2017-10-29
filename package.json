@@ -44,13 +44,17 @@
     "mocha": "^4.0.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
     "rimraf": "^2.6.1",
     "tslint": "^5.2.0",
     "tslint-config-standard": "^7.0.0",
-    "typescript": "^2.3.2"
+    "typescript": "^2.3.2",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.3"
   },
   "dependencies": {
-    "free-style": "^2.3.1",
-    "style-helper": "^2.1.1"
+    "free-style": "^2.5.0",
+    "style-helper": "^2.2.0"
   }
 }

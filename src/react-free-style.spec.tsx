@@ -24,11 +24,11 @@ describe('react free style', function () {
     })
 
     expect(renderToStaticMarkup(React.createElement(App))).to.equal(
-      `<div class="${withStyles.styles.text}">Hello world!</div>`
+      `<div class="${App.styles.text}">Hello world!</div>`
     )
 
     const rewound = rewind()
-    const expectedCss = `.${withStyles.styles.text}{background-color:red}*{box-sizing:border-box}`
+    const expectedCss = `.${App.styles.text}{background-color:red}*{box-sizing:border-box}`
 
     expect(rewound.toCss()).to.equal(expectedCss)
     expect(rewound.toString()).to.equal(`<style id="${STYLE_ID}">${expectedCss}</style>`)
@@ -80,11 +80,11 @@ describe('react free style', function () {
     }, true)
 
     expect(renderToStaticMarkup(React.createElement(Component))).to.equal(
-      '<div class="' + withStyles.styles.button + '">Test</div>'
+      '<div class="' + Component.styles.button + '">Test</div>'
     )
 
     expect(rewind().toCss()).to.equal(
-      `.${withStyles.styles.button}{color:red}body{color:blue}`
+      `.${Component.styles.button}{color:red}body{color:blue}`
     )
   })
 })
