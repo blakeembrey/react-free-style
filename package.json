@@ -53,6 +53,9 @@
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.9.3"
   },
+  "peerDependencies": {
+    "react": "*"
+  },
   "dependencies": {
     "free-style": "^2.5.0",
     "style-helper": "^2.2.0"
