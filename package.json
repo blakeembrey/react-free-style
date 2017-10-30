@@ -10,7 +10,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint": "tslint \"src/**/*.ts\" --project tsconfig.json --type-check",
+    "lint": "tslint \"src/**/*.ts\" --project tsconfig.json",
     "build": "rimraf dist/ && tsc",
     "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
     "test-cov": "istanbul cover -x dist/**/*.spec.js node_modules/mocha/bin/_mocha -- dist/**/*.spec.js -R spec --bail",
