@@ -47,7 +47,6 @@
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
     "rimraf": "^2.6.1",
-    "style-helper": "^2.3.1",
     "tslint": "^5.9.1",
     "tslint-config-standard": "^7.0.0",
     "typescript": "^2.8.1",
@@ -58,6 +57,7 @@
     "react": "*"
   },
   "dependencies": {
-    "free-style": "^2.5.0"
+    "free-style": "^2.5.0",
+    "style-helper": "^2.3.1"
   }
 }
