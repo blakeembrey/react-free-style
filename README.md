@@ -4,9 +4,8 @@
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
-[![Greenkeeper badge](https://badges.greenkeeper.io/blakeembrey/react-free-style.svg)](https://greenkeeper.io/)
 
-**React Free Style** is designed to combine the benefits of [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by automatically managing the style state of React components and updating the `<style />` component. This works even better with server-side rendering, as only the styles on the current page will be sent to clients.
+**React Free Style** combines [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by managing the style of React components and updating the `<style />`. This works wonderfully with server-side rendering, where only styles of the currently rendered components will delivered.
 
 ## Why?
 
@@ -14,9 +13,10 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 
 **Even more improvements with React Free Style**
 
-* Modular React.js components (automatically namespaced CSS)
-* Fast renders with automatic style mounting (outputs only the styles on the current page)
-* Supports isomorphic applications
+* Modular React.js components
+* Style debugging in development mode
+* Fast renders with automatic style for rendered React components
+* Supports universal/isomorphic applications
 
 ## Installation
 
@@ -41,55 +41,11 @@ const App = styled({
 React.render(<App />, document.body)
 ```
 
-Exports [`helpers`](https://github.com/blakeembrey/style-helper) and [`FreeStyle`](https://github.com/blakeembrey/free-style). Supports options from [`registerStyleSheet`](https://github.com/blakeembrey/style-helper#register-style-sheet) in `styled(sheet, options?, hash?, debug?)`.
-
-### Server Usage
-
-```js
-ReactDOM.renderToString(<Handler />);
-
-const styles = ReactFreeStyle.rewind()
-
-// Use as a React component.
-function html () {
-  return (
-    <html>
-      <head>
-        {styles.toComponent()}
-      </head>
-      <body>
-        <div id="content">
-          // React stuff here.
-        </div>
-      </body>
-    </html>
-  )
-}
-
-// Use as a string.
-const html = `
-  <!doctype html>
-  <html>
-    <head>
-      ${styles.toString()}
-    </head>
-    <body>
-      <div id="content">
-        // React stuff here.
-      </div>
-    </body>
-  </html>
-`
-
-// Use the CSS only.
-const css = styles.toCss()
-```
-
-**Tip!** If you're hydrating React on the client-side, feel free to remove the server rendered styles _after_ hydration (e.g. `document.head.removeChild(document.getElementById(FreeStyle.STYLE_ID))`).
+Exports [`helpers`](https://github.com/blakeembrey/style-helper) and [`FreeStyle`](https://github.com/blakeembrey/free-style). Supports options from [`registerStyleSheet`](https://github.com/blakeembrey/style-helper#register-style-sheet) with `styled(sheet, options?)`.
 
 ### HOC
 
-The `styled` function accepted a keyed map of styles and maps the styles to class names. It returns a HOC which provides the `styles` prop to the component (in addition to existing props).
+The `styled` function accepted an object of styles and maps the styles to CSS class names. It returns a HOC which provides the `styles` prop to the component (merged with passed props).
 
 ```js
 const withStyle = styled({
@@ -112,11 +68,64 @@ export default withStyle(props => {
 })
 ```
 
-**P.S.** The `styles` property will merge with any styles passed into the styled component. If you don't want this feature, use the `styles` object on `withStyles()` component instead of `props.styles`.
+Styles can also be functions:
+
+```js
+{
+  button: (styles, keyframes, hashRules) => ({
+    animation: `${keyframes.keyframe} 0.6s linear`,
+    animationIterationCount: 'infinite'
+  })
+}
+```
+
+By default, the `styles` prop will merge with `styles` passed into the component from above. To skip this behaviour, use `styled().styles` instead of `props.styles`.
+
+### Server Usage
+
+```js
+ReactDOM.renderToString(<Handler />);
+
+const styles = ReactFreeStyle.rewind()
+
+// Use as a React component.
+function html () {
+  return (
+    <html>
+      <head>
+        {styles.toComponent()}
+      </head>
+      <body>
+        <div id="content">
+          // React rendering here.
+        </div>
+      </body>
+    </html>
+  )
+}
+
+// Use as a string.
+const html = `
+  <!doctype html>
+  <html>
+    <head>
+      ${styles.toString()}
+    </head>
+    <body>
+      <div id="content">
+        ${/* React rendering here. */}
+      </div>
+    </body>
+  </html>
+`
+
+// Output CSS only.
+const css = styles.toCss()
+```
 
 ### Free-Style Methods
 
-The second argument to `withStyles` and third argument to `wrap` is `withFreeStyle`. When `true`, `freeStyle` is merged with the component props for inline styles. It supports [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) and [CSS objects](https://github.com/blakeembrey/free-style#css-object) during render/runtime.
+The second argument to `withStyles` and third argument to `wrap` is `withFreeStyle`. When `true`, `freeStyle` is merged with the component props for runtime CSS (supports [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) and [CSS objects](https://github.com/blakeembrey/free-style#css-object)).
 
 ### Using `wrap(...)`
 

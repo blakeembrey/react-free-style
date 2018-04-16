@@ -39,7 +39,7 @@ function createGlobal () {
   }
 
   for (let i = 0; i < document.styleSheets.length; i++) {
-    const item = document.styleSheets.item(i)
+    const item = document.styleSheets.item(i)!
 
     if (item.ownerNode === element) {
       styleSheet = item as CSSStyleSheet
@@ -184,7 +184,7 @@ export class StyleComponent extends React.Component<StyleComponentProps<any>, {}
   static displayName = 'Style'
 
   freeStyle?: StyleContext
-  unmountStyle: () => void
+  unmountStyle: () => void = () => undefined
 
   componentWillMount () {
     this.unmountStyle = addStyle(this.props.Style)
