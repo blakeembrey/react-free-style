@@ -21,7 +21,7 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 ## Installation
 
 ```
-npm install react-free-style --save
+npm install react-free-style@next --save
 ```
 
 ## Usage
@@ -46,6 +46,8 @@ const App = () => {
 // Render the application to the document.
 React.render(<App />, document.body);
 ```
+
+**Hot Tip:** You can create dynamic styles inline by invoking `createStyles({})()` inside `render()`.
 
 ### Client-side Rendering
 
