@@ -2,20 +2,20 @@
   "name": "react-free-style",
   "version": "7.0.2",
   "description": "Make React components easier and more maintainable by using JavaScript with Free Style",
-  "main": "dist/react-free-style.js",
-  "typings": "dist/react-free-style.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "files": [
-    "dist/",
-    "typings.json",
-    "LICENSE"
+    "dist/"
   ],
   "scripts": {
+    "prettier": "prettier --write",
     "lint": "tslint \"src/**/*.ts\" --project tsconfig.json",
-    "build": "rimraf dist/ && tsc",
-    "test-spec": "mocha dist/**/*.spec.js -R spec --bail",
-    "test-cov": "istanbul cover -x \"dist/**/*.spec.js\" node_modules/mocha/bin/_mocha -- \"dist/**/*.spec.js\" -R spec --bail",
-    "test": "npm run build && npm run lint && npm run test-cov",
-    "prepublish": "npm run build"
+    "format": "npm run prettier -- README.md \"{src,example}/**/*.{js,ts}\"",
+    "build": "rimraf dist && tsc",
+    "specs": "jest --coverage",
+    "test": "npm run -s lint && npm run -s build && npm run -s specs",
+    "prepare": "npm run build",
+    "example": "cd example && webpack-dev-server --config webpack.js"
   },
   "repository": {
     "type": "git",
@@ -34,31 +34,63 @@
     "url": "https://github.com/blakeembrey/react-free-style/issues"
   },
   "homepage": "https://github.com/blakeembrey/react-free-style",
+  "jest": {
+    "roots": [
+      "<rootDir>/src/"
+    ],
+    "transform": {
+      "\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,json,css,md}": [
+      "npm run prettier",
+      "git add"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
-    "@types/chai": "^4.0.0",
-    "@types/mocha": "^5.0.0",
-    "@types/react": "^16.3.10",
-    "@types/react-dom": "^16.0.5",
-    "chai": "^4.0.0",
-    "istanbul": "^0.4.1",
-    "mocha": "^5.0.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "react-redux": "^5.0.6",
-    "redux": "^4.0.0",
+    "@types/jest": "^23.3.9",
+    "@types/react": "^16.7.5",
+    "@types/react-dom": "^16.0.9",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^1.1.4",
+    "jest": "^23.6.0",
+    "lint-staged": "^8.0.4",
+    "prettier": "^1.15.2",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
     "rimraf": "^2.6.1",
+    "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.16.0",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.0.3",
+    "typescript": "^3.1.6",
     "webpack": "^4.5.0",
+    "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.8"
   },
   "peerDependencies": {
-    "react": "*",
-    "free-style": ">=2"
+    "react": "*"
   },
   "dependencies": {
-    "free-style": "^2.5.0",
-    "style-helper": "^2.3.1"
+    "free-style": "^2.5.2",
+    "style-helper": "^3.0.0"
   }
 }

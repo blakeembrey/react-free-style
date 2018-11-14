@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-**React Free Style** combines [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by managing the style of React components and updating the `<style />`. This works wonderfully with server-side rendering, where only styles of the currently rendered components will delivered.
+**React Free Style** combines [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by managing the style of React components dynamically. Works with server-side rendering, where only styles of rendered components will print.
 
 ## Why?
 
@@ -13,10 +13,10 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 
 **Even more improvements with React Free Style**
 
-* Modular React.js components
-* Style debugging in development mode
-* Fast renders with automatic style for rendered React components
-* Supports universal/isomorphic applications
+- Modular React.js components
+- Style debugging in development mode
+- Fast renders with automatic style for rendered React components
+- Supports universal/isomorphic applications
 
 ## Installation
 
@@ -26,137 +26,75 @@ npm install react-free-style --save
 
 ## Usage
 
-```js
-import { styled } from 'react-free-style'
+**Note:** This release requires [React.js hooks](https://reactjs.org/docs/hooks-intro.html) since it uses `useContext` and `useEffect` internally.
 
-const App = styled({
+```js
+import { createStyles } from "react-free-style";
+
+const useStyles = createStyles({
   text: {
-    backgroundColor: 'red'
+    backgroundColor: "red"
   }
-})((props) => {
-  return <div className={props.styles.text}>Hello world!</div>
-})
+});
+
+const App = () => {
+  const styles = useStyles();
+
+  return <div className={styles.text}>Hello world!</div>;
+};
 
 // Render the application to the document.
-React.render(<App />, document.body)
+React.render(<App />, document.body);
 ```
 
-Exports [`helpers`](https://github.com/blakeembrey/style-helper) and [`FreeStyle`](https://github.com/blakeembrey/free-style). Supports options from [`registerStyleSheet`](https://github.com/blakeembrey/style-helper#register-style-sheet) with `styled(sheet, options?)`.
+### Client-side Rendering
 
-### HOC
-
-The `styled` function accepted an object of styles and maps the styles to CSS class names. It returns a HOC which provides the `styles` prop to the component (merged with passed props).
+`StyleSheetRenderer` is an efficient CSS renderer for DOM using `CSSStyleSheet` directly with `.insertRule()`.
 
 ```js
-const withStyle = styled({
-  button: {
-    color: 'red'
-  },
-  {
-    css: {
-      'html, body': {
-        width: '100%',
-        height: '100%',
-        margin: 0
-      }
-    }
-  }
-})
+import { StyleSheetRenderer, Context } from "react-free-style";
 
-export default withStyle(props => {
-  return <button className={props.styles.button}>Test</button>
-})
+// const renderer = new NoopRenderer();
+const renderer = new StyleSheetRenderer();
+
+React.render(
+  <Context.Provider value={renderer}>
+    <App />
+  </Context.Provider>,
+  document.body
+);
 ```
 
-Styles can also be functions:
+### Server-side Rendering
+
+`MemoryRenderer` collects all styles in-memory for output at a later time.
 
 ```js
-{
-  button: (styles, keyframes, hashRules) => ({
-    animation: `${keyframes.keyframe} 0.6s linear`,
-    animationIterationCount: 'infinite'
-  })
-}
-```
+import { MemoryRenderer, Context } from "react-free-style";
 
-By default, the `styles` prop will merge with `styles` passed into the component from above. To skip this behaviour, use `styled().styles` instead of `props.styles`.
+// const renderer = new NoopRenderer();
+const renderer = new MemoryRenderer();
 
-### Server Usage
+const content = ReactDOM.renderToString(
+  <Context.Provider value={renderer}>
+    <App />
+  </Context.Provider>,
+  document.body
+);
 
-```js
-ReactDOM.renderToString(<Handler />);
-
-const styles = ReactFreeStyle.rewind()
-
-// Use as a React component.
-function html () {
-  return (
-    <html>
-      <head>
-        {styles.toComponent()}
-      </head>
-      <body>
-        <div id="content">
-          // React rendering here.
-        </div>
-      </body>
-    </html>
-  )
-}
-
-// Use as a string.
 const html = `
-  <!doctype html>
-  <html>
-    <head>
-      ${styles.toString()}
-    </head>
-    <body>
-      <div id="content">
-        ${/* React rendering here. */}
-      </div>
-    </body>
-  </html>
-`
-
-// Output CSS only.
-const css = styles.toCss()
-```
-
-### Free-Style Methods
-
-The second argument to `withStyles` and third argument to `wrap` is `withFreeStyle`. When `true`, `freeStyle` is merged with the component props for runtime CSS (supports [styles](https://github.com/blakeembrey/free-style#styles), [keyframes](https://github.com/blakeembrey/free-style#keyframes), [rules](https://github.com/blakeembrey/free-style#rules) and [CSS objects](https://github.com/blakeembrey/free-style#css-object)).
-
-### Using `wrap(...)`
-
-```js
-import { wrap, FreeStyle } from 'react-free-style'
-
-const Style = FreeStyle.create()
-
-const myClassName = Style.registerStyle({
-  color: 'red'
-})
-
-class MyComponent extends React.Component {
-
-  render () {
-    const inlineClassName = this.props.freeStyle.registerStyle(props.style)
-
-    return React.createElement(
-      'button',
-      {
-        // Class names from `props`, `Style` and runtime context.
-        className: `${this.props.className} ${myClassName} ${this.props.inlineClassName}`
-      },
-      this.props.children
-    )
-  }
-
-}
-
-// Change `props` using the style callback.
-export default wrap(MyComponent, Style, true)
+<!doctype html>
+<html>
+  <head>
+    ${renderer.toString()}
+  </head>
+  <body>
+    <div id="content">
+      ${content}
+    </div>
+  </body>
+</html>
+`;
 ```
 
 ## License
