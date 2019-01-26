@@ -73,7 +73,7 @@ export class StyleSheetRenderer extends MemoryRenderer {
       element = document.createElement("style");
       element.setAttribute("id", STYLE_ID);
       element.setAttribute("type", "text/css");
-      document.head!.appendChild(element);
+      document.head.appendChild(element);
     }
 
     for (let i = 0; i < document.styleSheets.length; i++) {
