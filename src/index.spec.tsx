@@ -1,9 +1,9 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { createStyles, MemoryRenderer, Context, STYLE_ID } from ".";
+import { createStyles, MemoryRenderer, Context, STYLE_ID, styled } from ".";
 
-describe("react free style", function() {
-  it("should render using hooks", function() {
+describe("react free style", () => {
+  it("should render using hooks", () => {
     const useStyles = createStyles(
       {
         text: {
@@ -41,5 +41,35 @@ describe("react free style", function() {
     expect(renderer.toString()).toEqual(
       `<style id="${STYLE_ID}">${expectedCss}</style>`
     );
+  });
+
+  it("should support styled components", () => {
+    const Button = styled("button", {
+      color: "red"
+    });
+
+    expect(renderToStaticMarkup(<Button />)).toEqual(
+      `<button class="${Button.styles.style}"></button>`
+    );
+
+    expect(renderToStaticMarkup(<Button>Hello world!</Button>)).toEqual(
+      `<button class="${Button.styles.style}">Hello world!</button>`
+    );
+
+    expect(
+      renderToStaticMarkup(
+        <Button>
+          <i className="test" /> Hello world!
+        </Button>
+      )
+    ).toEqual(
+      `<button class="${
+        Button.styles.style
+      }"><i class="test"></i> Hello world!</button>`
+    );
+
+    expect(
+      renderToStaticMarkup(<Button className="test">Text</Button>)
+    ).toEqual(`<button class="${Button.styles.style} test">Text</button>`);
   });
 });

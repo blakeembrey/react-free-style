@@ -140,3 +140,25 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
 
   return Style;
 }
+
+/**
+ * Type-safe styled component.
+ */
+export function styled<T extends keyof JSX.IntrinsicElements>(
+  type: keyof JSX.IntrinsicElements,
+  style: helpers.StyleValue
+) {
+  const useStyle = createStyles({ style });
+
+  return Object.assign(
+    function Component(props: JSX.IntrinsicElements[T]) {
+      const { style } = useStyle();
+      const className = props.className ? `${style} ${props.className}` : style;
+      return React.createElement(type, Object.assign({}, props, { className }));
+    },
+    {
+      styles: useStyle.styles,
+      displayName: `Styled<${type}>`
+    }
+  );
+}
