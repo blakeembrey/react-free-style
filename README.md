@@ -21,7 +21,7 @@ Check out why you should be [doing CSS in JS](https://github.com/blakeembrey/fre
 ## Installation
 
 ```
-npm install react-free-style@next --save
+npm install react-free-style --save
 ```
 
 ## Usage
