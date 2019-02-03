@@ -144,18 +144,21 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
 /**
  * Type-safe styled component.
  */
-export function styled<T extends keyof JSX.IntrinsicElements>(
-  type: keyof JSX.IntrinsicElements,
-  style: helpers.StyleValue
-) {
+export function styled<
+  T extends keyof JSX.IntrinsicElements &
+    (keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap)
+>(type: T, style: helpers.StyleValue) {
   const useStyle = createStyles({ style });
 
   return Object.assign(
-    function Component(props: JSX.IntrinsicElements[T]) {
+    React.forwardRef(function Component(
+      props: JSX.IntrinsicElements[T],
+      ref: React.Ref<(HTMLElementTagNameMap & SVGElementTagNameMap)[T]> | null
+    ) {
       const { style } = useStyle();
       const className = props.className ? `${style} ${props.className}` : style;
-      return React.createElement(type, Object.assign({}, props, { className }));
-    },
+      return React.createElement(type, { ...props, ref, className });
+    }),
     {
       styles: useStyle.styles,
       displayName: `Styled<${type}>`

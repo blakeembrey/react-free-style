@@ -1,4 +1,5 @@
 import * as React from "react";
+import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createStyles, MemoryRenderer, Context, STYLE_ID, styled } from ".";
 
@@ -71,5 +72,14 @@ describe("react free style", () => {
     expect(
       renderToStaticMarkup(<Button className="test">Text</Button>)
     ).toEqual(`<button class="${Button.styles.style} test">Text</button>`);
+  });
+
+  it("should correctly forward refs", () => {
+    const ref = React.createRef<HTMLButtonElement>();
+    const Button = styled("button", {});
+
+    renderIntoDocument(<Button ref={ref}>Test</Button>);
+
+    expect(ref.current).not.toBeNull();
   });
 });
