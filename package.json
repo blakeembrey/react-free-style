@@ -1,6 +1,6 @@
 {
   "name": "react-free-style",
-  "version": "8.2.0",
+  "version": "8.2.1",
   "description": "Make React components easier and more maintainable by using JavaScript with Free Style",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
