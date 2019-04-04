@@ -165,11 +165,6 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
   return Style;
 }
 
-export interface StyledProperties {
-  styleName: string;
-  displayName: string;
-}
-
 /**
  * Type-safe styled component.
  */
