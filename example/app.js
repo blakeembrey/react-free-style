@@ -1,24 +1,30 @@
 import * as React from "react";
 import { render } from "react-dom";
-import { createStyles, Context, StyleSheetRenderer } from "../dist";
+import { styled, Context, StyleSheetRenderer } from "../dist";
 
-const useStyles = createStyles(
-  {
-    container: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100vw",
-      height: "100vh"
-    }
-  },
-  {
+const Container = styled("div", freeStyle => {
+  freeStyle.registerCss({
     body: {
       fontFamily: "sans-serif",
       margin: 0
     }
-  }
-);
+  });
+
+  return {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100vw",
+    height: "100vh"
+  };
+});
+
+const Pre = styled("pre", {
+  margin: 10,
+  maxWidth: 300,
+  wordWrap: "break-word"
+});
 
 function randomColor() {
   return (
@@ -27,20 +33,18 @@ function randomColor() {
 }
 
 const App = () => {
-  const styles = useStyles();
+  const Style = React.useContext(Context);
   const [color, setColor] = React.useState();
-  const dynamicStyles = createStyles({
-    background: { backgroundColor: color }
-  })();
 
   return React.createElement(
-    "div",
-    { className: `${dynamicStyles.background} ${styles.container}` },
+    Container,
+    { css: { backgroundColor: color } },
     React.createElement(
       "button",
       { onClick: () => setColor(randomColor()) },
       "Random Color"
-    )
+    ),
+    React.createElement(Pre, {}, Style.toCss())
   );
 };
 

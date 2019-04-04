@@ -63,7 +63,7 @@ export class MemoryRenderer extends NoopRenderer {
  * DOM style sheet renderer. Used for front-end applications.
  */
 export class StyleSheetRenderer extends MemoryRenderer {
-  constructor() {
+  constructor(debug?: boolean) {
     super();
 
     let element = document.getElementById(STYLE_ID) as HTMLStyleElement;
@@ -85,18 +85,26 @@ export class StyleSheetRenderer extends MemoryRenderer {
       }
     }
 
-    this.freeStyle = FreeStyle.create(undefined, undefined, {
-      add(style, index) {
-        styleSheet.insertRule(style.getStyles(), index);
-      },
-      remove(style, index) {
-        styleSheet.deleteRule(index);
-      },
-      change(style, oldIndex, newIndex) {
-        styleSheet.deleteRule(oldIndex);
-        styleSheet.insertRule(style.getStyles(), newIndex);
-      }
-    });
+    if (debug) {
+      this.freeStyle = FreeStyle.create(undefined, undefined, {
+        add: () => (element.innerHTML = this.toCss()),
+        remove: () => (element.innerHTML = this.toCss()),
+        change: () => (element.innerHTML = this.toCss())
+      });
+    } else {
+      this.freeStyle = FreeStyle.create(undefined, undefined, {
+        add: (style, index) => {
+          styleSheet.insertRule(style.getStyles(), index);
+        },
+        remove: (_, index) => {
+          styleSheet.deleteRule(index);
+        },
+        change: (style, oldIndex, newIndex) => {
+          styleSheet.deleteRule(oldIndex);
+          styleSheet.insertRule(style.getStyles(), newIndex);
+        }
+      });
+    }
   }
 }
 
@@ -147,15 +155,12 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
   const values = Style.values(); // Cache values re-renders.
 
   // Unmount styles automatically.
-  React.useEffect(
-    () => () => {
-      for (const item of values) ContextStyle.remove(item);
-    },
-    values
-  );
+  React.useEffect(() => () => {
+    for (const item of values) ContextStyle.remove(item);
+  });
 
   // Mount styles automatically.
-  for (const item of values) ContextStyle.add(Style);
+  for (const item of values) ContextStyle.add(item);
 
   return Style;
 }
@@ -191,21 +196,28 @@ export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
       const elementProps = { ...props, ref };
 
       if (styleName) {
-        elementProps.className = elementProps.className
-          ? `${elementProps.className} ${styleName}`
-          : styleName;
+        elementProps.className = join(styleName, elementProps.className);
       }
 
-      if (props.css) {
-        const cssName = Style.registerStyle(props.css, `${name}_css`);
-        elementProps.css = undefined;
-        elementProps.className = elementProps.className
-          ? `${props.className} ${styleName}`
-          : cssName;
-      }
+      const dynamic = React.useMemo(
+        () => {
+          if (!props.css) return;
+          const Style = FreeStyle.create();
+          const cssName = Style.registerStyle(props.css, `${name}_css`);
+          return { Style, cssName };
+        },
+        [props.css]
+      );
 
       // Register styles after registration.
       useStyle(Style);
+
+      // Use dynamic styles after registered styles.
+      if (dynamic) {
+        elementProps.css = undefined;
+        elementProps.className = join(dynamic.cssName, elementProps.className);
+        useStyle(dynamic.Style);
+      }
 
       return React.createElement(type, elementProps);
     }),
@@ -214,6 +226,14 @@ export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
       displayName
     }
   );
+}
+
+/**
+ * Append CSS class name.
+ */
+function join(className: string, origClassName?: string) {
+  if (origClassName) return `${origClassName} ${className}`;
+  return className;
 }
 
 /**
