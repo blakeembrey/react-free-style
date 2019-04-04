@@ -3,7 +3,7 @@ import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createStyles, MemoryRenderer, Context, STYLE_ID, styled } from ".";
 
-describe("react free style", () => {
+describe("index", () => {
   it("should render using hooks", () => {
     const useStyles = createStyles(
       {
@@ -50,11 +50,11 @@ describe("react free style", () => {
     });
 
     expect(renderToStaticMarkup(<Button />)).toEqual(
-      `<button class="${Button.styles.style}"></button>`
+      `<button class="${Button.styleName}"></button>`
     );
 
     expect(renderToStaticMarkup(<Button>Hello world!</Button>)).toEqual(
-      `<button class="${Button.styles.style}">Hello world!</button>`
+      `<button class="${Button.styleName}">Hello world!</button>`
     );
 
     expect(
@@ -65,13 +65,13 @@ describe("react free style", () => {
       )
     ).toEqual(
       `<button class="${
-        Button.styles.style
+        Button.styleName
       }"><i class="test"></i> Hello world!</button>`
     );
 
     expect(
       renderToStaticMarkup(<Button className="test">Text</Button>)
-    ).toEqual(`<button class="${Button.styles.style} test">Text</button>`);
+    ).toEqual(`<button class="test ${Button.styleName}">Text</button>`);
   });
 
   it("should correctly forward refs", () => {

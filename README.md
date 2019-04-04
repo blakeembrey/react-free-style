@@ -26,7 +26,51 @@ npm install react-free-style --save
 
 ## Usage
 
-**Note:** This release requires [React.js hooks](https://reactjs.org/docs/hooks-intro.html) since it uses `useContext` and `useEffect` internally.
+### Styled
+
+```js
+import { styled } from "react-free-style";
+
+const Button = styled("button", {
+  backgroundColor: "red"
+});
+
+const App = () => {
+  return <Button css={{ color: "blue" }}>Hello world!</Button>;
+};
+```
+
+### JSX
+
+```js
+/** @jsx jsx */
+
+import { jsx } from "react-free-style/dist/jsx";
+
+const App = () => {
+  return (
+    <button css={{ color: "blue", backgroundColor: "red" }}>
+      Hello world!
+    </button>
+  );
+};
+```
+
+### Tags
+
+```js
+import * as Tags from "react-free-style/dist/tags";
+
+const App = () => {
+  return (
+    <Tags.Button css={{ color: "blue", backgroundColor: "red" }}>
+      Hello world!
+    </Tags.Button>
+  );
+};
+```
+
+### Styles Object
 
 ```js
 import { createStyles } from "react-free-style";
@@ -42,12 +86,9 @@ const App = () => {
 
   return <div className={styles.text}>Hello world!</div>;
 };
-
-// Render the application to the document.
-React.render(<App />, document.body);
 ```
 
-**Hot Tip:** You can create dynamic styles inline by invoking `createStyles({})()` inside `render()`.
+## Rendering CSS
 
 ### Client-side Rendering
 

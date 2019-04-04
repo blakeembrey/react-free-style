@@ -1,11 +1,11 @@
 import * as React from "react";
 import * as FreeStyle from "free-style";
-import * as helpers from "style-helper";
+import { PropertiesFallback } from "csstype";
 
 /**
  * Re-export the `free-style` module.
  */
-export { FreeStyle, helpers };
+export { FreeStyle };
 
 /**
  * Tag the element for rendering later.
@@ -16,11 +16,11 @@ export const STYLE_ID = "__react_free_style__";
  * Basic `noop` renderer. Used as the default context for testing.
  */
 export class NoopRenderer {
-  merge(freeStyle: FreeStyle.FreeStyle) {
+  add(item: FreeStyle.Container<any>) {
     return; // Do nothing.
   }
 
-  unmerge(freeStyle: FreeStyle.FreeStyle) {
+  remove(item: FreeStyle.Container<any>) {
     return; // Do nothing.
   }
 
@@ -46,12 +46,12 @@ export class NoopRenderer {
 export class MemoryRenderer extends NoopRenderer {
   freeStyle = FreeStyle.create();
 
-  merge(freeStyle: FreeStyle.FreeStyle) {
-    this.freeStyle.merge(freeStyle);
+  add(item: FreeStyle.Rule | FreeStyle.Style) {
+    this.freeStyle.add(item);
   }
 
-  unmerge(freeStyle: FreeStyle.FreeStyle) {
-    this.freeStyle.unmerge(freeStyle);
+  remove(item: FreeStyle.Rule | FreeStyle.Style) {
+    this.freeStyle.remove(item);
   }
 
   toCss() {
@@ -109,17 +109,30 @@ export const Context = React.createContext<NoopRenderer>(new NoopRenderer());
  * Create a pre-computed `useStyles` hook for React.
  */
 export function createStyles<T extends string>(
-  sheet: helpers.StyleSheet<T> = {} as helpers.StyleSheet<T>,
-  css?: helpers.StyleValue,
+  sheet: Record<T, CssValue>,
+  globalCss?: CssValue,
   hash?: FreeStyle.HashFunction,
   debug?: boolean
 ) {
   const Style = FreeStyle.create(hash, debug);
-  const styles = helpers.registerStyleSheet(Style, sheet, css);
+  const styles: Record<T, string> = Object.create(null);
+
+  for (const key of Object.keys(sheet) as T[]) {
+    const css: CssValue = sheet[key];
+    styles[key] = Style.registerStyle(
+      typeof css === "function" ? css(Style) : css
+    );
+  }
+
+  if (globalCss) {
+    Style.registerCss(
+      typeof globalCss === "function" ? globalCss(Style) : globalCss
+    );
+  }
 
   return Object.assign(
     function useStyles() {
-      useStyle(Style); // Automatically use "own styles".
+      useStyle(Style); // Automatically use styles.
       return styles;
     },
     { styles }
@@ -130,38 +143,151 @@ export function createStyles<T extends string>(
  * Dynamically register other `FreeStyle` instance.
  */
 export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
-  const context = React.useContext(Context);
+  const ContextStyle = React.useContext(Context);
+  const values = Style.values(); // Cache values re-renders.
 
   // Unmount styles automatically.
-  React.useEffect(() => () => context.unmerge(Style));
+  React.useEffect(
+    () => () => {
+      for (const item of values) ContextStyle.remove(item);
+    },
+    values
+  );
 
   // Mount styles automatically.
-  context.merge(Style);
+  for (const item of values) ContextStyle.add(Style);
 
   return Style;
+}
+
+export interface StyledProperties {
+  styleName: string;
+  displayName: string;
 }
 
 /**
  * Type-safe styled component.
  */
-export function styled<
-  T extends keyof JSX.IntrinsicElements &
-    (keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap)
->(type: T, style: helpers.StyleValue) {
-  const useStyle = createStyles({ style });
+export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
+  type: T,
+  cssValue?: CssValue,
+  debugName?: string
+) {
+  const Style = FreeStyle.create();
+  const name = debugName || type;
+  const displayName = `styled(${name})`;
+  const styleName = cssValue
+    ? Style.registerStyle(
+        typeof cssValue === "function" ? cssValue(Style) : cssValue,
+        `${name}_styled`
+      )
+    : "";
 
   return Object.assign(
     React.forwardRef(function Component(
-      props: JSX.IntrinsicElements[T],
-      ref: React.Ref<(HTMLElementTagNameMap & SVGElementTagNameMap)[T]> | null
+      props: JSX.IntrinsicElements[T] & P & { css?: Css },
+      ref: React.Ref<HTMLElement> | null
     ) {
-      const { style } = useStyle();
-      const className = props.className ? `${style} ${props.className}` : style;
-      return React.createElement(type, { ...props, ref, className });
+      const elementProps = { ...props, ref };
+
+      if (styleName) {
+        elementProps.className = elementProps.className
+          ? `${elementProps.className} ${styleName}`
+          : styleName;
+      }
+
+      if (props.css) {
+        const cssName = Style.registerStyle(props.css, `${name}_css`);
+        elementProps.css = undefined;
+        elementProps.className = elementProps.className
+          ? `${props.className} ${styleName}`
+          : cssName;
+      }
+
+      // Register styles after registration.
+      useStyle(Style);
+
+      return React.createElement(type, elementProps);
     }),
     {
-      styles: useStyle.styles,
-      displayName: `Styled<${type}>`
+      styleName,
+      displayName
     }
   );
 }
+
+/**
+ * Typed style object.
+ *
+ * Based on https://github.com/typestyle/typestyle/pull/245/files
+ */
+export interface Css extends PropertiesFallback<string | number> {
+  /** State selector */
+  "&:active"?: Css;
+  "&:any"?: Css;
+  "&:checked"?: Css;
+  "&:default"?: Css;
+  "&:disabled"?: Css;
+  "&:empty"?: Css;
+  "&:enabled"?: Css;
+  "&:first"?: Css;
+  "&:first-child"?: Css;
+  "&:first-of-type"?: Css;
+  "&:fullscreen"?: Css;
+  "&:focus"?: Css;
+  "&:hover"?: Css;
+  "&:indeterminate"?: Css;
+  "&:in-range"?: Css;
+  "&:invalid"?: Css;
+  "&:last-child"?: Css;
+  "&:last-of-type"?: Css;
+  "&:left"?: Css;
+  "&:link"?: Css;
+  "&:only-child"?: Css;
+  "&:only-of-type"?: Css;
+  "&:optional"?: Css;
+  "&:out-of-range"?: Css;
+  "&:read-only"?: Css;
+  "&:read-write"?: Css;
+  "&:required"?: Css;
+  "&:right"?: Css;
+  "&:root"?: Css;
+  "&:scope"?: Css;
+  "&:target"?: Css;
+  "&:valid"?: Css;
+  "&:visited"?: Css;
+  /**
+   * Pseudo-elements
+   * https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-elements
+   */
+  "&::after"?: Css;
+  "&::before"?: Css;
+  "&::first-letter"?: Css;
+  "&::first-line"?: Css;
+  "&::selection"?: Css;
+  "&::backdrop"?: Css;
+  "&::placeholder"?: Css;
+  "&::marker"?: Css;
+  "&::spelling-error"?: Css;
+  "&::grammar-error"?: Css;
+
+  /** Children */
+  "&>*"?: Css;
+
+  /**
+   * Mobile first media query example
+   */
+  "@media screen and (min-width: 700px)"?: Css;
+
+  /**
+   * Desktop first media query example
+   */
+  "@media screen and (max-width: 700px)"?: Css;
+
+  [selector: string]: string | number | (string | number)[] | Css | undefined;
+}
+
+/**
+ * Functional CSS value.
+ */
+type CssValue = ((freeStyle: FreeStyle.FreeStyle) => Css) | Css;
