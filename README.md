@@ -88,7 +88,23 @@ const App = () => {
 };
 ```
 
-## Rendering CSS
+## Themes
+
+Use `React.Context` to define a theme and custom components with `css` props. E.g.
+
+```js
+const ThemeContext = React.createContext({
+  color: "red"
+});
+
+const Button = () => {
+  const theme = React.useContext(ThemeContext);
+
+  return <button css={{ color: theme.color }}>Hello world!</button>;
+};
+```
+
+## Rendering
 
 ### Client-side Rendering
 
