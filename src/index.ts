@@ -189,12 +189,12 @@ export function composeStyle(
   ...components: Array<{ Style: FreeStyle.FreeStyle; styleName: string }>
 ): ComputedValue<string> {
   return (Style, displayName) => {
-    let styleName = cssValueToString(Style, displayName, cssValue);
+    let styleName = "";
     for (const c of components) {
       Style.merge(c.Style); // Merge style instances.
-      styleName = join(styleName, c.styleName); // Append composed style names.
+      styleName = join(c.styleName, styleName); // Append composed style names.
     }
-    return styleName;
+    return join(cssValueToString(Style, displayName, cssValue), styleName);
   };
 }
 
