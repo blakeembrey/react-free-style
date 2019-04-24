@@ -117,24 +117,23 @@ export const Context = React.createContext<NoopRenderer>(new NoopRenderer());
  * Create a pre-computed `useStyles` hook for React.
  */
 export function createStyles<T extends string>(
-  sheet: Record<T, CssValue>,
-  globalCss?: CssValue,
-  hash?: FreeStyle.HashFunction,
-  debug?: boolean
+  sheet: Record<T, Css | ComputedValue<Css>>,
+  globalCss?: Css | ComputedValue<Css>,
+  displayName = ""
 ) {
-  const Style = FreeStyle.create(hash, debug);
+  const Style = FreeStyle.create();
   const styles: Record<T, string> = Object.create(null);
 
   for (const key of Object.keys(sheet) as T[]) {
-    const css: CssValue = sheet[key];
-    styles[key] = Style.registerStyle(
-      typeof css === "function" ? css(Style) : css
-    );
+    const cssValue: Css | ComputedValue<Css> = sheet[key];
+    styles[key] = cssValueToString(Style, displayName, cssValue);
   }
 
   if (globalCss) {
     Style.registerCss(
-      typeof globalCss === "function" ? globalCss(Style) : globalCss
+      typeof globalCss === "function"
+        ? globalCss(Style, displayName)
+        : globalCss
     );
   }
 
@@ -143,7 +142,7 @@ export function createStyles<T extends string>(
       useStyle(Style); // Automatically use styles.
       return styles;
     },
-    { styles }
+    { Style, styles }
   );
 }
 
@@ -166,6 +165,40 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
 }
 
 /**
+ * CSS value to class name.
+ */
+function cssValueToString(
+  Style: FreeStyle.FreeStyle,
+  displayName: string,
+  cssValue?: CssValue
+) {
+  if (typeof cssValue === "function") {
+    const result = cssValue(Style, displayName);
+    if (typeof result === "string") return result;
+    return Style.registerStyle(result, displayName);
+  }
+
+  return cssValue ? Style.registerStyle(cssValue, displayName) : "";
+}
+
+/**
+ * Extend styles with previously defined `styled` components.
+ */
+export function composeStyle(
+  cssValue: CssValue,
+  ...components: Array<{ Style: FreeStyle.FreeStyle; styleName: string }>
+): ComputedValue<string> {
+  return (Style, displayName) => {
+    let styleName = cssValueToString(Style, displayName, cssValue);
+    for (const c of components) {
+      Style.merge(c.Style); // Merge style instances.
+      styleName = join(styleName, c.styleName); // Append composed style names.
+    }
+    return styleName;
+  };
+}
+
+/**
  * Type-safe styled component.
  */
 export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
@@ -176,47 +209,41 @@ export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
   const Style = FreeStyle.create();
   const name = debugName || type;
   const displayName = `styled(${name})`;
-  const styleName = cssValue
-    ? Style.registerStyle(
-        typeof cssValue === "function" ? cssValue(Style) : cssValue,
-        `${name}_styled`
-      )
-    : "";
+  const styleName = cssValueToString(Style, `${name}_styled`, cssValue);
 
   return Object.assign(
     React.forwardRef(function Component(
       props: JSX.IntrinsicElements[T] & P & { css?: Css },
       ref: React.Ref<HTMLElement> | null
     ) {
-      const elementProps = { ...props, ref };
+      const typeProps = { ...props, ref };
 
-      if (styleName) {
-        elementProps.className = join(styleName, elementProps.className);
-      }
+      useStyle(Style);
 
       const dynamic = React.useMemo(
         () => {
           if (!props.css) return;
           const Style = FreeStyle.create();
-          const cssName = Style.registerStyle(props.css, `${name}_css`);
-          return { Style, cssName };
+          const styleName = Style.registerStyle(props.css, `${name}_css`);
+          return { Style, styleName };
         },
         [props.css]
       );
 
-      // Register styles after registration.
-      useStyle(Style);
+      // Prepend component `styleName` to props.
+      if (styleName) typeProps.className = join(styleName, typeProps.className);
 
       // Use dynamic styles after registered styles.
       if (dynamic) {
-        elementProps.css = undefined;
-        elementProps.className = join(dynamic.cssName, elementProps.className);
+        typeProps.css = undefined;
+        typeProps.className = join(dynamic.styleName, typeProps.className);
         useStyle(dynamic.Style);
       }
 
-      return React.createElement(type, elementProps);
+      return React.createElement(type, typeProps);
     }),
     {
+      Style,
       styleName,
       displayName
     }
@@ -303,6 +330,14 @@ export interface Css extends PropertiesFallback<string | number> {
 }
 
 /**
+ * Functional compute styles.
+ */
+export type ComputedValue<T> = (
+  Style: FreeStyle.FreeStyle,
+  displayName: string
+) => T;
+
+/**
  * Functional CSS value.
  */
-type CssValue = ((freeStyle: FreeStyle.FreeStyle) => Css) | Css;
+export type CssValue = ComputedValue<string | Css> | Css;

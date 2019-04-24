@@ -40,6 +40,22 @@ const App = () => {
 };
 ```
 
+#### Composition
+
+```js
+import { composeStyle } from "react-free-style";
+
+const LargeButton = styled(
+  "button",
+  composeStyle(
+    {
+      fontSize: 20
+    },
+    Button
+  )
+);
+```
+
 ### JSX
 
 ```js

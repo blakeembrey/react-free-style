@@ -1,7 +1,14 @@
 import * as React from "react";
 import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
-import { createStyles, MemoryRenderer, Context, STYLE_ID, styled } from ".";
+import {
+  createStyles,
+  MemoryRenderer,
+  Context,
+  STYLE_ID,
+  styled,
+  composeStyle
+} from "./index";
 
 describe("index", () => {
   it("should render using hooks", () => {
@@ -81,5 +88,27 @@ describe("index", () => {
     renderIntoDocument(<Button ref={ref}>Test</Button>);
 
     expect(ref.current).not.toBeNull();
+  });
+
+  it("should compose styled components", () => {
+    const Button = styled("button", {
+      color: "red"
+    });
+
+    const LargeButton = styled(
+      "button",
+      composeStyle(
+        {
+          fontSize: 10
+        },
+        Button
+      )
+    );
+
+    expect(renderToStaticMarkup(<LargeButton />)).toEqual(
+      `<button class="${LargeButton.styleName}"></button>`
+    );
+
+    expect(LargeButton.styleName).toMatch(/button_styled_\w+ button_styled_\w+/)
   });
 });
