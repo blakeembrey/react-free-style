@@ -151,7 +151,7 @@ export function createStyles<T extends string>(
  */
 export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
   const ContextStyle = React.useContext(Context);
-  const values = Style.values(); // Cache values re-renders.
+  const values = Style.values(); // Cache `values` for unmount.
 
   // Unmount styles automatically.
   React.useEffect(() => () => {
@@ -162,6 +162,108 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
   for (const item of values) ContextStyle.add(item);
 
   return Style;
+}
+
+/**
+ * Create a re-usable CSS object.
+ */
+export function css(
+  cssValue: CssValue,
+  displayName = ""
+): ComputedValue<string> {
+  const CssStyle = FreeStyle.create();
+  const styleName = cssValueToString(CssStyle, displayName, cssValue);
+  return Style => {
+    Style.merge(CssStyle);
+    return styleName;
+  };
+}
+
+/**
+ * Combine a set of CSS styles into a single computed style.
+ */
+export function join(...cssValues: CssValue[]): ComputedValue<string> {
+  return (Style, displayName) => {
+    let styleName = "";
+    for (const cssValue of cssValues) {
+      styleName = append(
+        cssValueToString(Style, displayName, cssValue),
+        styleName
+      );
+    }
+    return styleName;
+  };
+}
+
+/**
+ * Extend styles with previously defined `styled` components.
+ */
+export function composeStyle(
+  cssValue: CssValue,
+  ...components: Array<{ Style: FreeStyle.FreeStyle; styleName: string }>
+): ComputedValue<string> {
+  return (Style, displayName) => {
+    let styleName = "";
+    for (const c of components) {
+      Style.merge(c.Style); // Merge style instances.
+      styleName = append(c.styleName, styleName); // Append composed style names.
+    }
+    return append(cssValueToString(Style, displayName, cssValue), styleName);
+  };
+}
+
+/**
+ * Type-safe styled component.
+ */
+export function styled<T extends keyof JSX.IntrinsicElements>(
+  type: T,
+  cssValue?: CssValue,
+  debugName?: string
+) {
+  const Style = FreeStyle.create();
+  const name = debugName || type;
+  const displayName = `styled(${name})`;
+  const styleName = cssValueToString(Style, `${name}_styled`, cssValue);
+
+  return Object.assign(
+    React.forwardRef(function Component(
+      props: JSX.IntrinsicElements[T] & { css?: CssValue },
+      ref: React.Ref<HTMLElement> | null
+    ) {
+      const typeProps = { ...props, ref };
+
+      useStyle(Style);
+
+      const dynamic = React.useMemo(
+        () => {
+          if (!props.css) return;
+          const Style = FreeStyle.create();
+          const styleName = cssValueToString(Style, `${name}_css`, props.css);
+          return { Style, styleName };
+        },
+        [props.css]
+      );
+
+      // Prepend component `styleName` to props.
+      if (styleName) {
+        typeProps.className = append(styleName, typeProps.className);
+      }
+
+      // Use dynamic styles after registered styles.
+      if (dynamic) {
+        typeProps.css = undefined;
+        typeProps.className = append(dynamic.styleName, typeProps.className);
+        useStyle(dynamic.Style);
+      }
+
+      return React.createElement(type, typeProps);
+    }),
+    {
+      Style,
+      styleName,
+      displayName
+    }
+  );
 }
 
 /**
@@ -182,78 +284,9 @@ function cssValueToString(
 }
 
 /**
- * Extend styles with previously defined `styled` components.
- */
-export function composeStyle(
-  cssValue: CssValue,
-  ...components: Array<{ Style: FreeStyle.FreeStyle; styleName: string }>
-): ComputedValue<string> {
-  return (Style, displayName) => {
-    let styleName = "";
-    for (const c of components) {
-      Style.merge(c.Style); // Merge style instances.
-      styleName = join(c.styleName, styleName); // Append composed style names.
-    }
-    return join(cssValueToString(Style, displayName, cssValue), styleName);
-  };
-}
-
-/**
- * Type-safe styled component.
- */
-export function styled<T extends keyof JSX.IntrinsicElements, P = {}>(
-  type: T,
-  cssValue?: CssValue,
-  debugName?: string
-) {
-  const Style = FreeStyle.create();
-  const name = debugName || type;
-  const displayName = `styled(${name})`;
-  const styleName = cssValueToString(Style, `${name}_styled`, cssValue);
-
-  return Object.assign(
-    React.forwardRef(function Component(
-      props: JSX.IntrinsicElements[T] & P & { css?: Css },
-      ref: React.Ref<HTMLElement> | null
-    ) {
-      const typeProps = { ...props, ref };
-
-      useStyle(Style);
-
-      const dynamic = React.useMemo(
-        () => {
-          if (!props.css) return;
-          const Style = FreeStyle.create();
-          const styleName = Style.registerStyle(props.css, `${name}_css`);
-          return { Style, styleName };
-        },
-        [props.css]
-      );
-
-      // Prepend component `styleName` to props.
-      if (styleName) typeProps.className = join(styleName, typeProps.className);
-
-      // Use dynamic styles after registered styles.
-      if (dynamic) {
-        typeProps.css = undefined;
-        typeProps.className = join(dynamic.styleName, typeProps.className);
-        useStyle(dynamic.Style);
-      }
-
-      return React.createElement(type, typeProps);
-    }),
-    {
-      Style,
-      styleName,
-      displayName
-    }
-  );
-}
-
-/**
  * Append CSS class name.
  */
-function join(className: string, origClassName?: string) {
+function append(className: string, origClassName?: string) {
   if (origClassName) return `${origClassName} ${className}`;
   return className;
 }

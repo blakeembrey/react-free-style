@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled, Css } from "./index";
+import { styled, CssValue } from "./index";
 
 export const jsx: typeof React.createElement = (
   type: any,
@@ -17,6 +17,6 @@ export const jsx: typeof React.createElement = (
 
 declare module "react" {
   interface HTMLAttributes<T> {
-    css?: Css;
+    css?: CssValue;
   }
 }
