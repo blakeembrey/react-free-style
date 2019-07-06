@@ -43,15 +43,15 @@ const App = () => {
 #### Composition
 
 ```js
-import { composeStyle } from "react-free-style";
+import { join } from "react-free-style";
 
 const LargeButton = styled(
   "button",
-  composeStyle(
+  join(
     {
       fontSize: 20
     },
-    Button
+    Button.style
   )
 );
 ```
@@ -86,21 +86,20 @@ const App = () => {
 };
 ```
 
-### Styles Object
+### CSS Objects
 
 ```js
-import { createStyles } from "react-free-style";
+import { css } from "react-free-style";
 
-const useStyles = createStyles({
-  text: {
-    backgroundColor: "red"
-  }
+const style = css({
+  backgroundColor: "red"
 });
 
 const App = () => {
-  const styles = useStyles();
+  const styleName = useCss(style);
 
-  return <div className={styles.text}>Hello world!</div>;
+  // Or pass `css(...)` objects directly to `css={}`, `join(...)`, etc.
+  return <div className={styleName}>Hello world!</div>;
 };
 ```
 

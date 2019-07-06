@@ -1,67 +1,20 @@
 import * as React from "react";
 import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  createStyles,
-  MemoryRenderer,
-  Context,
-  STYLE_ID,
-  styled,
-  composeStyle
-} from "./index";
+import { join, styled } from "./index";
 
 describe("index", () => {
-  it("should render using hooks", () => {
-    const useStyles = createStyles(
-      {
-        text: {
-          backgroundColor: "red"
-        }
-      },
-      {
-        "*": {
-          boxSizing: "border-box"
-        }
-      }
-    );
-
-    const App = () => {
-      const styles = useStyles();
-
-      return <div className={styles.text}>Hello world!</div>;
-    };
-
-    const renderer = new MemoryRenderer();
-
-    expect(
-      renderToStaticMarkup(
-        <Context.Provider value={renderer}>
-          <App />
-        </Context.Provider>
-      )
-    ).toEqual(`<div class="${useStyles.styles.text}">Hello world!</div>`);
-
-    const expectedCss = `.${
-      useStyles.styles.text
-    }{background-color:red}*{box-sizing:border-box}`;
-
-    expect(renderer.toCss()).toEqual(expectedCss);
-    expect(renderer.toString()).toEqual(
-      `<style id="${STYLE_ID}">${expectedCss}</style>`
-    );
-  });
-
   it("should support styled components", () => {
     const Button = styled("button", {
       color: "red"
     });
 
     expect(renderToStaticMarkup(<Button />)).toEqual(
-      `<button class="${Button.styleName}"></button>`
+      `<button class="${Button.style[0]}"></button>`
     );
 
     expect(renderToStaticMarkup(<Button>Hello world!</Button>)).toEqual(
-      `<button class="${Button.styleName}">Hello world!</button>`
+      `<button class="${Button.style[0]}">Hello world!</button>`
     );
 
     expect(
@@ -72,13 +25,13 @@ describe("index", () => {
       )
     ).toEqual(
       `<button class="${
-        Button.styleName
+        Button.style[0]
       }"><i class="test"></i> Hello world!</button>`
     );
 
     expect(
       renderToStaticMarkup(<Button className="test">Text</Button>)
-    ).toEqual(`<button class="test ${Button.styleName}">Text</button>`);
+    ).toEqual(`<button class="test ${Button.style[0]}">Text</button>`);
   });
 
   it("should correctly forward refs", () => {
@@ -97,18 +50,18 @@ describe("index", () => {
 
     const LargeButton = styled(
       "button",
-      composeStyle(
+      join(
         {
           fontSize: 10
         },
-        Button
+        Button.style
       )
     );
 
     expect(renderToStaticMarkup(<LargeButton />)).toEqual(
-      `<button class="${LargeButton.styleName}"></button>`
+      `<button class="${LargeButton.style[0]}"></button>`
     );
 
-    expect(LargeButton.styleName).toMatch(/button_styled_\w+ button_styled_\w+/)
+    expect(LargeButton.style[0]).toMatch(/button_styled_\w+ button_styled_\w+/);
   });
 });
