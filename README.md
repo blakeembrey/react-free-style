@@ -43,17 +43,15 @@ const App = () => {
 #### Composition
 
 ```js
-import { join } from "react-free-style";
-
-const LargeButton = styled(
-  "button",
-  join(
-    {
-      fontSize: 20
-    },
-    Button.style
-  )
-);
+const LargeButton = styled("button", [
+  {
+    fontSize: 16
+  },
+  Button.style,
+  {
+    marginBottom: 8
+  }
+]);
 ```
 
 ### JSX
@@ -120,6 +118,8 @@ const Button = () => {
 ```
 
 ## Rendering
+
+By default, CSS output is discarded.
 
 ### Client-side Rendering
 
