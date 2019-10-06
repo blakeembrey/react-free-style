@@ -248,8 +248,6 @@ function toClassName(
         ? cssValue
         : cssValueToString(Style, displayName, cssValue);
 
-    // className = append(cssClassName, className);
-
     if (className) {
       if (cssClassName) className = `${className} ${cssClassName}`;
     } else {
