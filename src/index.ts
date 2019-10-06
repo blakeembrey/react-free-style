@@ -114,6 +114,13 @@ export class StyleSheetRenderer extends MemoryRenderer {
 export const Context = React.createContext<NoopRenderer>(new NoopRenderer());
 
 /**
+ * Pre-computed CSS style.
+ */
+export class CachedCss {
+  constructor(public className: string, public Style: FreeStyle.FreeStyle) {}
+}
+
+/**
  * Dynamically register other `FreeStyle` instance.
  */
 export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
@@ -138,12 +145,12 @@ export function useCss(
   cssValue: CssValue | undefined,
   displayName = ""
 ): string {
-  const [styleName, Style] = React.useMemo(
-    () => (Array.isArray(cssValue) ? cssValue : css(cssValue, displayName)),
-    [cssValue, displayName]
-  );
+  const { className, Style } = React.useMemo(() => css(cssValue, displayName), [
+    cssValue,
+    displayName
+  ]);
   useStyle(Style);
-  return styleName;
+  return className;
 }
 
 /**
@@ -154,8 +161,8 @@ export function css(
   displayName = ""
 ): CachedCss {
   const Style = FreeStyle.create();
-  const styleName = cssValueToString(Style, displayName, cssValue);
-  return [styleName, Style];
+  const className = cssValueToString(Style, displayName, cssValue);
+  return new CachedCss(className, Style);
 }
 
 /**
@@ -164,18 +171,7 @@ export function css(
 export function join(
   ...cssValues: (CssValue | string | undefined)[]
 ): ComputedCss {
-  return (Style, displayName) => {
-    let styleName = "";
-    for (const cssValue of cssValues) {
-      styleName = append(
-        typeof cssValue === "string"
-          ? cssValue
-          : cssValueToString(Style, displayName, cssValue),
-        styleName
-      );
-    }
-    return styleName;
-  };
+  return (Style, displayName) => toClassName(Style, displayName, cssValues);
 }
 
 /**
@@ -204,13 +200,10 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
         ...props,
         ref,
         className,
-        css: undefined // Strip `css` property.
+        css: undefined // Remove `css` property.
       });
     }),
-    {
-      style,
-      displayName
-    }
+    { displayName, style }
   );
 }
 
@@ -221,7 +214,7 @@ function cssValueToString(
   Style: FreeStyle.FreeStyle,
   displayName: string,
   cssValue?: CssValue
-) {
+): string {
   if (typeof cssValue === "function") {
     const result = cssValue(Style, displayName);
     if (typeof result === "string") return result;
@@ -229,20 +222,39 @@ function cssValueToString(
   }
 
   if (Array.isArray(cssValue)) {
-    Style.merge(cssValue[1]);
-    return cssValue[0];
+    return toClassName(Style, displayName, cssValue);
+  }
+
+  if (cssValue instanceof CachedCss) {
+    Style.merge(cssValue.Style);
+    return cssValue.className;
   }
 
   return cssValue ? Style.registerStyle(cssValue, displayName) : "";
 }
 
 /**
- * Append CSS class name.
+ * Convert list of styles to a class name.
  */
-function append(className: string, initClassName = "") {
-  if (initClassName) {
-    if (className) return `${initClassName} ${className}`;
-    return initClassName;
+function toClassName(
+  Style: FreeStyle.FreeStyle,
+  displayName: string,
+  cssValues: (CssValue | string | undefined)[]
+) {
+  let className = "";
+  for (const cssValue of cssValues) {
+    const cssClassName =
+      typeof cssValue === "string"
+        ? cssValue
+        : cssValueToString(Style, displayName, cssValue);
+
+    // className = append(cssClassName, className);
+
+    if (className) {
+      if (cssClassName) className = `${className} ${cssClassName}`;
+    } else {
+      className = cssClassName;
+    }
   }
   return className;
 }
@@ -319,11 +331,6 @@ export interface Css extends PropertiesFallback<string | number> {
 }
 
 /**
- * Pre-computed CSS style.
- */
-export type CachedCss = [string, FreeStyle.FreeStyle];
-
-/**
  * Functional compute styles.
  */
 export type ComputedCss = (
@@ -334,4 +341,8 @@ export type ComputedCss = (
 /**
  * Any supported CSS value.
  */
-export type CssValue = CachedCss | ComputedCss | Css;
+export type CssValue =
+  | CachedCss
+  | ComputedCss
+  | Css
+  | Array<CachedCss | ComputedCss | Css>;

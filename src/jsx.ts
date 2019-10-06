@@ -7,7 +7,7 @@ export const jsx: typeof React.createElement = (
 ): any => {
   if (typeof type === "string") {
     return React.createElement(
-      styled(type as keyof JSX.IntrinsicElements),
+      styled(type as keyof JSX.IntrinsicElements) as any,
       ...args
     );
   }
