@@ -141,10 +141,7 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
 /**
  * React hook for dynamically registering CSS values in a component.
  */
-export function useCss(
-  cssValue: CssValue | undefined,
-  displayName = ""
-): string {
+export function useCss(cssValue: CssValue, displayName = ""): string {
   const { className, Style } = React.useMemo(() => css(cssValue, displayName), [
     cssValue,
     displayName
@@ -156,10 +153,7 @@ export function useCss(
 /**
  * Create a cached CSS object.
  */
-export function css(
-  cssValue: CssValue | undefined,
-  displayName = ""
-): CachedCss {
+export function css(cssValue: CssValue, displayName = ""): CachedCss {
   const Style = FreeStyle.create();
   const className = cssValueToString(Style, displayName, cssValue);
   return new CachedCss(className, Style);
@@ -168,10 +162,8 @@ export function css(
 /**
  * Combine a set of CSS styles into a single computed style.
  */
-export function join(
-  ...cssValues: (CssValue | string | undefined)[]
-): ComputedCss {
-  return (Style, displayName) => toClassName(Style, displayName, cssValues);
+export function join(...cssValues: CssValue[]): ComputedCss {
+  return (Style, displayName) => cssValueToString(Style, displayName, cssValues);
 }
 
 /**
@@ -213,8 +205,10 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
 function cssValueToString(
   Style: FreeStyle.FreeStyle,
   displayName: string,
-  cssValue?: CssValue
+  cssValue: CssValue
 ): string {
+  if (typeof cssValue === "string") return cssValue;
+
   if (typeof cssValue === "function") {
     const result = cssValue(Style, displayName);
     if (typeof result === "string") return result;
@@ -222,7 +216,16 @@ function cssValueToString(
   }
 
   if (Array.isArray(cssValue)) {
-    return toClassName(Style, displayName, cssValue);
+    let className = "";
+    for (const value of cssValue) {
+      const cssClassName = cssValueToString(Style, displayName, value);
+      if (className) {
+        if (cssClassName) className = `${className} ${cssClassName}`;
+      } else {
+        className = cssClassName;
+      }
+    }
+    return className;
   }
 
   if (cssValue instanceof CachedCss) {
@@ -231,30 +234,6 @@ function cssValueToString(
   }
 
   return cssValue ? Style.registerStyle(cssValue, displayName) : "";
-}
-
-/**
- * Convert list of styles to a class name.
- */
-function toClassName(
-  Style: FreeStyle.FreeStyle,
-  displayName: string,
-  cssValues: (CssValue | string | undefined)[]
-) {
-  let className = "";
-  for (const cssValue of cssValues) {
-    const cssClassName =
-      typeof cssValue === "string"
-        ? cssValue
-        : cssValueToString(Style, displayName, cssValue);
-
-    if (className) {
-      if (cssClassName) className = `${className} ${cssClassName}`;
-    } else {
-      className = cssClassName;
-    }
-  }
-  return className;
 }
 
 /**
@@ -337,10 +316,17 @@ export type ComputedCss = (
 ) => string | Css;
 
 /**
+ * Recursive CSS values array.
+ */
+export interface CssValueArray extends Array<CssValue> {}
+
+/**
  * Any supported CSS value.
  */
 export type CssValue =
   | CachedCss
   | ComputedCss
   | Css
-  | Array<CachedCss | ComputedCss | Css>;
+  | string
+  | undefined
+  | CssValueArray;
