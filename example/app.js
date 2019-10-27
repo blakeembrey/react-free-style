@@ -23,7 +23,8 @@ const Container = styled("div", freeStyle => {
 const Pre = styled("pre", {
   margin: 10,
   maxWidth: 300,
-  wordWrap: "break-word"
+  wordBreak: "break-all",
+  whiteSpace: "normal"
 });
 
 function randomColor() {
