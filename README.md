@@ -4,6 +4,7 @@
 [![NPM downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
+[![Bundle size][bundlephobia-image]][bundlephobia-url]
 
 **React Free Style** combines [Free Style](https://github.com/blakeembrey/free-style) with [React.js](https://github.com/facebook/react) by managing the style of React components dynamically. Works with server-side rendering, where only styles of rendered components will print.
 
@@ -183,3 +184,5 @@ MIT license
 [travis-url]: https://travis-ci.org/blakeembrey/react-free-style
 [coveralls-image]: https://img.shields.io/coveralls/blakeembrey/react-free-style.svg?style=flat
 [coveralls-url]: https://coveralls.io/r/blakeembrey/react-free-style?branch=master
+[bundlephobia-image]: https://img.shields.io/bundlephobia/minzip/react-free-style.svg
+[bundlephobia-url]: https://bundlephobia.com/result?p=react-free-style
