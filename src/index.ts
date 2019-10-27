@@ -3,11 +3,6 @@ import * as FreeStyle from "free-style";
 import { PropertiesFallback } from "csstype";
 
 /**
- * Re-export the `free-style` module.
- */
-export { FreeStyle };
-
-/**
  * Tag the element for rendering later.
  */
 export const STYLE_ID = "__react_free_style__";
@@ -86,13 +81,13 @@ export class StyleSheetRenderer extends MemoryRenderer {
     }
 
     if (debug) {
-      this.freeStyle = FreeStyle.create(undefined, undefined, {
+      this.freeStyle = FreeStyle.create({
         add: () => (element.innerHTML = this.toCss()),
         remove: () => (element.innerHTML = this.toCss()),
         change: () => (element.innerHTML = this.toCss())
       });
     } else {
-      this.freeStyle = FreeStyle.create(undefined, undefined, {
+      this.freeStyle = FreeStyle.create({
         add: (style, index) => {
           styleSheet.insertRule(style.getStyles(), index);
         },
@@ -141,11 +136,8 @@ export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
 /**
  * React hook for dynamically registering CSS values in a component.
  */
-export function useCss(cssValue: CssValue, displayName = ""): string {
-  const { className, Style } = React.useMemo(() => css(cssValue, displayName), [
-    cssValue,
-    displayName
-  ]);
+export function useCss(cssValue: CssValue): string {
+  const { className, Style } = React.useMemo(() => css(cssValue), [cssValue]);
   useStyle(Style);
   return className;
 }
@@ -153,17 +145,10 @@ export function useCss(cssValue: CssValue, displayName = ""): string {
 /**
  * Create a cached CSS object.
  */
-export function css(cssValue: CssValue, displayName = ""): CachedCss {
+export function css(cssValue: CssValue): CachedCss {
   const Style = FreeStyle.create();
-  const className = cssValueToString(Style, displayName, cssValue);
+  const className = cssValueToString(Style, cssValue);
   return new CachedCss(className, Style);
-}
-
-/**
- * Combine a set of CSS styles into a single computed style.
- */
-export function join(...cssValues: CssValue[]): ComputedCss {
-  return (Style, displayName) => cssValueToString(Style, displayName, cssValues);
 }
 
 /**
@@ -171,22 +156,17 @@ export function join(...cssValues: CssValue[]): ComputedCss {
  */
 export function styled<T extends keyof JSX.IntrinsicElements>(
   type: T,
-  cssValue?: CssValue,
-  debugName?: string
+  cssValue?: CssValue
 ) {
-  const name = debugName || type;
-  const displayName = `styled(${name})`;
-  const style = css(cssValue, `${name}_styled`);
+  const displayName = `styled(${type})`;
+  const style = css(cssValue);
 
   return Object.assign(
     React.forwardRef(function Component(
       props: JSX.IntrinsicElements[T] & { css?: CssValue },
       ref: React.Ref<HTMLElement> | null
     ) {
-      const className = useCss(
-        join(props.className, style, props.css),
-        `${name}_css`
-      );
+      const className = useCss([props.className, style, props.css]);
 
       return React.createElement(type, {
         ...props,
@@ -204,21 +184,20 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
  */
 function cssValueToString(
   Style: FreeStyle.FreeStyle,
-  displayName: string,
   cssValue: CssValue
 ): string {
   if (typeof cssValue === "string") return cssValue;
 
   if (typeof cssValue === "function") {
-    const result = cssValue(Style, displayName);
+    const result = cssValue(Style);
     if (typeof result === "string") return result;
-    return Style.registerStyle(result, displayName);
+    return Style.registerStyle(result);
   }
 
   if (Array.isArray(cssValue)) {
     let className = "";
     for (const value of cssValue) {
-      const cssClassName = cssValueToString(Style, displayName, value);
+      const cssClassName = cssValueToString(Style, value);
       if (className) {
         if (cssClassName) className = `${className} ${cssClassName}`;
       } else {
@@ -233,7 +212,7 @@ function cssValueToString(
     return cssValue.className;
   }
 
-  return cssValue ? Style.registerStyle(cssValue, displayName) : "";
+  return cssValue ? Style.registerStyle(cssValue) : "";
 }
 
 /**
@@ -310,10 +289,7 @@ export interface Css extends PropertiesFallback<string | number> {
 /**
  * Functional compute styles.
  */
-export type ComputedCss = (
-  Style: FreeStyle.FreeStyle,
-  displayName: string
-) => string | Css;
+export type ComputedCss = (Style: FreeStyle.FreeStyle) => string | Css;
 
 /**
  * Recursive CSS values array.

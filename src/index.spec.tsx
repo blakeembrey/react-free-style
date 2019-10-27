@@ -2,7 +2,7 @@ import * as React from "react";
 import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
 import { create } from "react-test-renderer";
-import { join, styled, MemoryRenderer, Context } from "./index";
+import { styled, MemoryRenderer, Context } from "./index";
 
 describe("index", () => {
   it("should support styled components", () => {
@@ -25,9 +25,7 @@ describe("index", () => {
         </Button>
       )
     ).toEqual(
-      `<button class="${
-        Button.style.className
-      }"><i class="test"></i> Hello world!</button>`
+      `<button class="${Button.style.className}"><i class="test"></i> Hello world!</button>`
     );
 
     expect(
@@ -69,46 +67,17 @@ describe("index", () => {
       color: "red"
     });
 
-    const LargeButton = styled(
-      "button",
-      join(
-        {
-          fontSize: 10
-        },
-        Button.style
-      )
-    );
-
-    expect(renderToStaticMarkup(<LargeButton />)).toEqual(
-      `<button class="${LargeButton.style.className}"></button>`
-    );
-
-    expect(LargeButton.style.className).toMatch(
-      /button_styled_\w+ button_styled_\w+/
-    );
-  });
-
-  it("should treat an array as list of styles", () => {
-    const Button = styled("button", {
-      color: "red"
-    });
-
     const LargeButton = styled("button", [
       {
         fontSize: 10
       },
-      Button.style,
-      {
-        marginBottom: 8
-      }
+      Button.style
     ]);
 
     expect(renderToStaticMarkup(<LargeButton />)).toEqual(
       `<button class="${LargeButton.style.className}"></button>`
     );
 
-    expect(LargeButton.style.className).toMatch(
-      /button_styled_\w+ button_styled_\w+ button_styled_\w+/
-    );
+    expect(LargeButton.style.className).toMatch(/f\w+ f\w+/);
   });
 });

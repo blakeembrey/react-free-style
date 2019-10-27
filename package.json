@@ -94,6 +94,6 @@
   },
   "dependencies": {
     "csstype": "^2.6.7",
-    "free-style": "^2.6.1"
+    "free-style": "^3.0.0"
   }
 }

@@ -5,7 +5,7 @@ import * as tags from "./tags";
 describe("tags", () => {
   it("should support element tags", () => {
     expect(renderToStaticMarkup(<tags.A css={{ color: "red" }} />)).toMatch(
-      /<a class="a_css_f\w+"><\/a>/
+      /<a class="f\w+"><\/a>/
     );
   });
 });
