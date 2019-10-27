@@ -96,7 +96,7 @@ const style = css({
 const App = () => {
   const styleName = useCss(style);
 
-  // Or pass `css(...)` objects directly to `css={}`, `join(...)`, etc.
+  // Or pass `css(...)` objects directly to `css={}`.
   return <div className={styleName}>Hello world!</div>;
 };
 ```
