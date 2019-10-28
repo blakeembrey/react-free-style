@@ -1,6 +1,11 @@
 import * as React from "react";
-import * as FreeStyle from "free-style";
-import { PropertiesFallback } from "csstype";
+import { create, Container, Rule, Style, FreeStyle, Styles } from "free-style";
+import { StandardPropertiesFallback, SvgPropertiesFallback } from "csstype";
+
+/**
+ * Export Free Style class for types.
+ */
+export { FreeStyle };
 
 /**
  * Tag the element for rendering later.
@@ -11,11 +16,11 @@ export const STYLE_ID = "__react_free_style__";
  * Basic `noop` renderer. Used as the default context for testing.
  */
 export class NoopRenderer {
-  add(item: FreeStyle.Container<any>) {
+  add(item: Container<any>) {
     // Do nothing.
   }
 
-  remove(item: FreeStyle.Container<any>) {
+  remove(item: Container<any>) {
     // Do nothing.
   }
 
@@ -39,13 +44,13 @@ export class NoopRenderer {
  * In-memory renderer. Used for server-side rendering.
  */
 export class MemoryRenderer extends NoopRenderer {
-  freeStyle = FreeStyle.create();
+  freeStyle = create();
 
-  add(item: FreeStyle.Rule | FreeStyle.Style) {
+  add(item: Rule | Style) {
     this.freeStyle.add(item);
   }
 
-  remove(item: FreeStyle.Rule | FreeStyle.Style) {
+  remove(item: Rule | Style) {
     this.freeStyle.remove(item);
   }
 
@@ -81,13 +86,13 @@ export class StyleSheetRenderer extends MemoryRenderer {
     }
 
     if (debug) {
-      this.freeStyle = FreeStyle.create({
+      this.freeStyle = create({
         add: () => (element.innerHTML = this.toCss()),
         remove: () => (element.innerHTML = this.toCss()),
         change: () => (element.innerHTML = this.toCss())
       });
     } else {
-      this.freeStyle = FreeStyle.create({
+      this.freeStyle = create({
         add: (style, index) => {
           styleSheet.insertRule(style.getStyles(), index);
         },
@@ -112,13 +117,13 @@ export const Context = React.createContext<NoopRenderer>(new NoopRenderer());
  * Pre-computed CSS style.
  */
 export class CachedCss {
-  constructor(public className: string, public Style: FreeStyle.FreeStyle) {}
+  constructor(public className: string, public Style: FreeStyle) {}
 }
 
 /**
  * Dynamically register other `FreeStyle` instance.
  */
-export function useStyle<T extends FreeStyle.FreeStyle>(Style: T): T {
+export function useStyle<T extends FreeStyle>(Style: T): T {
   const ContextStyle = React.useContext(Context);
   const values = Style.values(); // Cache `values` for unmount.
 
@@ -146,7 +151,7 @@ export function useCss(cssValue: CssValue): string {
  * Create a cached CSS object.
  */
 export function css(cssValue: CssValue): CachedCss {
-  const Style = FreeStyle.create();
+  const Style = create();
   const className = cssValueToString(Style, cssValue);
   return new CachedCss(className, Style);
 }
@@ -182,10 +187,7 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
 /**
  * CSS value to class name.
  */
-function cssValueToString(
-  Style: FreeStyle.FreeStyle,
-  cssValue: CssValue
-): string {
+function cssValueToString(Style: FreeStyle, cssValue: CssValue): string {
   if (typeof cssValue === "string") return cssValue;
 
   if (typeof cssValue === "function") {
@@ -220,8 +222,13 @@ function cssValueToString(
  *
  * Based on https://github.com/typestyle/typestyle/pull/245/files
  */
-export interface Css extends PropertiesFallback<string | number> {
-  /** State selector */
+export interface Css
+  extends StandardPropertiesFallback<string | number>,
+    SvgPropertiesFallback<string | number>,
+    Styles {
+  /**
+   * https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
+   */
   "&:active"?: Css;
   "&:any"?: Css;
   "&:checked"?: Css;
@@ -256,7 +263,6 @@ export interface Css extends PropertiesFallback<string | number> {
   "&:valid"?: Css;
   "&:visited"?: Css;
   /**
-   * Pseudo-elements
    * https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-elements
    */
   "&::after"?: Css;
@@ -270,26 +276,35 @@ export interface Css extends PropertiesFallback<string | number> {
   "&::spelling-error"?: Css;
   "&::grammar-error"?: Css;
 
-  /** Children */
+  /**
+   * Children.
+   */
   "&>*"?: Css;
 
   /**
-   * Mobile first media query example
+   * Mobile first media query example.
    */
-  "@media screen and (min-width: 700px)"?: Css;
+  "@media screen and (min-width: 768px)"?: Css;
 
   /**
-   * Desktop first media query example
+   * Desktop first media query example.
    */
-  "@media screen and (max-width: 700px)"?: Css;
+  "@media screen and (max-width: 768px)"?: Css;
 
-  [selector: string]: string | number | (string | number)[] | Css | undefined;
+  [selector: string]:
+    | null
+    | undefined
+    | boolean
+    | string
+    | number
+    | (boolean | string | number)[]
+    | Css;
 }
 
 /**
  * Functional compute styles.
  */
-export type ComputedCss = (Style: FreeStyle.FreeStyle) => string | Css;
+export type ComputedCss = (Style: FreeStyle) => string | Css;
 
 /**
  * Recursive CSS values array.
