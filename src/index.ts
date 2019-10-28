@@ -12,11 +12,11 @@ export const STYLE_ID = "__react_free_style__";
  */
 export class NoopRenderer {
   add(item: FreeStyle.Container<any>) {
-    return; // Do nothing.
+    // Do nothing.
   }
 
   remove(item: FreeStyle.Container<any>) {
-    return; // Do nothing.
+    // Do nothing.
   }
 
   toCss() {

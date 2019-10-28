@@ -4,18 +4,25 @@
   "description": "Make React components easier and more maintainable by using JavaScript with Free Style",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "module": "dist.es2015/index.js",
+  "sideEffects": false,
+  "jsnext:main": "dist.es2015/index.js",
   "files": [
-    "dist/"
+    "dist/",
+    "dist.es2015/"
   ],
   "scripts": {
+    "example": "cd example && webpack-dev-server --config webpack.js",
     "prettier": "prettier --write",
-    "lint": "tslint \"src/**/*.ts\" --project tsconfig.json",
-    "format": "npm run prettier -- README.md \"{src,example}/**/*.{js,ts}\"",
-    "build": "rimraf dist && tsc",
+    "lint": "tslint \"src/**/*\" --project tsconfig.json",
+    "format": "npm run prettier -- \"*.{json,md,yml}\" \"{src,examples,benchmarks}/**/*.{js,ts}\"",
+    "build": "rimraf dist/ dist.es2015/ && tsc && tsc -P tsconfig.es2015.json",
+    "bench:hash": "ts-node benchmarks/hash.ts",
+    "bench:perf": "ts-node benchmarks/perf.ts",
     "specs": "jest --coverage",
-    "test": "npm run -s lint && npm run -s build && npm run -s specs",
-    "prepare": "npm run build",
-    "example": "cd example && webpack-dev-server --config webpack.js"
+    "test": "npm run build && npm run lint && npm run specs && npm run size",
+    "size": "size-limit",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -34,6 +41,12 @@
     "url": "https://github.com/blakeembrey/react-free-style/issues"
   },
   "homepage": "https://github.com/blakeembrey/react-free-style",
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "3.1 kB"
+    }
+  ],
   "jest": {
     "roots": [
       "<rootDir>/src/"
@@ -66,6 +79,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@size-limit/preset-small-lib": "^2.1.6",
     "@types/jest": "^24.0.11",
     "@types/node": "^12.7.11",
     "@types/react": "^16.9.5",

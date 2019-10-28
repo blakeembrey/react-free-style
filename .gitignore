@@ -1,6 +1,6 @@
-node_modules
-coverage
+node_modules/
+coverage/
 .DS_Store
 npm-debug.log
-dist
-typings
+dist/
+dist.es2015/
