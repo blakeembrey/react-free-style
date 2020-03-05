@@ -23,7 +23,7 @@ export class NoopRenderer {
     return "";
   }
 
-  toComponent(props: JSX.IntrinsicElements["style"]) {
+  toComponent(props?: JSX.IntrinsicElements["style"]) {
     return React.createElement("style", {
       ...props,
       dangerouslySetInnerHTML: { __html: this.toCss() }

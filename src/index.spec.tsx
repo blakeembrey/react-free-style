@@ -56,10 +56,19 @@ describe("index", () => {
     );
 
     expect(memoryCss.toCss()).toEqual(`.${Button.style.className}{color:red}`);
+    expect(renderToStaticMarkup(memoryCss.toComponent())).toEqual(
+      `<style>.${Button.style.className}{color:red}</style>`
+    );
+    expect(renderToStaticMarkup(memoryCss.toComponent({ id: "test" }))).toEqual(
+      `<style id="test">.${Button.style.className}{color:red}</style>`
+    );
 
     renderer.unmount();
 
     expect(memoryCss.toCss()).toEqual("");
+    expect(renderToStaticMarkup(memoryCss.toComponent())).toEqual(
+      "<style></style>"
+    );
   });
 
   it("should compose styled components", () => {
