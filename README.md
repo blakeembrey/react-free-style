@@ -85,23 +85,6 @@ const App = () => {
 };
 ```
 
-### CSS Objects
-
-```js
-import { css } from "react-free-style";
-
-const style = css({
-  backgroundColor: "red"
-});
-
-const App = () => {
-  const styleName = useCss(style);
-
-  // Or pass `css(...)` objects directly to `css={}`.
-  return <div className={styleName}>Hello world!</div>;
-};
-```
-
 ## Themes
 
 Use `React.Context` to define a theme and custom components with `css` props. E.g.
