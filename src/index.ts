@@ -8,11 +8,6 @@ import { StandardPropertiesFallback, SvgPropertiesFallback } from "csstype";
 export { FreeStyle };
 
 /**
- * Tag the element for rendering later.
- */
-export const STYLE_ID = "__react_free_style__";
-
-/**
  * Basic `noop` renderer. Used as the default context for testing.
  */
 export class NoopRenderer {
@@ -28,13 +23,9 @@ export class NoopRenderer {
     return "";
   }
 
-  toString() {
-    return `<style id="${STYLE_ID}">${this.toCss()}</style>`;
-  }
-
-  toComponent() {
+  toComponent(props: JSX.IntrinsicElements["style"]) {
     return React.createElement("style", {
-      id: STYLE_ID,
+      ...props,
       dangerouslySetInnerHTML: { __html: this.toCss() }
     });
   }
@@ -66,23 +57,14 @@ export class StyleSheetRenderer extends MemoryRenderer {
   constructor(debug?: boolean) {
     super();
 
-    let element = document.getElementById(STYLE_ID) as HTMLStyleElement;
+    const element = document.createElement("style");
+    document.head.appendChild(element);
     let styleSheet: CSSStyleSheet;
 
-    if (!element) {
-      element = document.createElement("style");
-      element.setAttribute("id", STYLE_ID);
-      element.setAttribute("type", "text/css");
-      document.head.appendChild(element);
-    }
-
     for (let i = 0; i < document.styleSheets.length; i++) {
-      const item = document.styleSheets.item(i)!;
+      styleSheet = document.styleSheets.item(i) as CSSStyleSheet;
 
-      if (item.ownerNode === element) {
-        styleSheet = item as CSSStyleSheet;
-        break;
-      }
+      if (styleSheet.ownerNode === element) break;
     }
 
     if (debug) {
@@ -141,8 +123,8 @@ export function useStyle<T extends FreeStyle>(Style: T): T {
 /**
  * React hook for dynamically registering CSS values in a component.
  */
-export function useCss(cssValue: CssValue): string {
-  const { className, Style } = React.useMemo(() => css(cssValue), [cssValue]);
+export function useCss(...cssValue: CssValue[]): string {
+  const { className, Style } = React.useMemo(() => css(cssValue), cssValue);
   useStyle(Style);
   return className;
 }
@@ -171,7 +153,7 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
       props: JSX.IntrinsicElements[T] & { css?: CssValue },
       ref: React.Ref<HTMLElement> | null
     ) {
-      const className = useCss([props.className, style, props.css]);
+      const className = useCss(props.className, style, props.css);
 
       return React.createElement(type, {
         ...props,
