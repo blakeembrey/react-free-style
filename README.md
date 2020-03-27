@@ -33,7 +33,7 @@ npm install react-free-style --save
 import { styled } from "react-free-style";
 
 const Button = styled("button", {
-  backgroundColor: "red"
+  backgroundColor: "red",
 });
 
 const App = () => {
@@ -46,12 +46,12 @@ const App = () => {
 ```js
 const LargeButton = styled("button", [
   {
-    fontSize: 16
+    fontSize: 16,
   },
   Button.style,
   {
-    marginBottom: 8
-  }
+    marginBottom: 8,
+  },
 ]);
 ```
 
@@ -60,7 +60,7 @@ const LargeButton = styled("button", [
 ```js
 /** @jsx jsx */
 
-import { jsx } from "react-free-style/dist/jsx";
+import { jsx } from "react-free-style";
 
 const App = () => {
   return (
@@ -71,27 +71,13 @@ const App = () => {
 };
 ```
 
-### Tags
-
-```js
-import * as Tags from "react-free-style/dist/tags";
-
-const App = () => {
-  return (
-    <Tags.Button css={{ color: "blue", backgroundColor: "red" }}>
-      Hello world!
-    </Tags.Button>
-  );
-};
-```
-
 ## Themes
 
 Use `React.Context` to define a theme and custom components with `css` props. E.g.
 
 ```js
 const ThemeContext = React.createContext({
-  color: "red"
+  color: "red",
 });
 
 const Button = () => {
