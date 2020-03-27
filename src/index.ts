@@ -31,7 +31,7 @@ export class NoopRenderer {
   > {
     return React.createElement("style", {
       ...props,
-      dangerouslySetInnerHTML: { __html: this.toCss() }
+      dangerouslySetInnerHTML: { __html: this.toCss() },
     });
   }
 }
@@ -76,7 +76,7 @@ export class StyleSheetRenderer extends MemoryRenderer {
       this.freeStyle = create({
         add: () => (element.innerHTML = this.toCss()),
         remove: () => (element.innerHTML = this.toCss()),
-        change: () => (element.innerHTML = this.toCss())
+        change: () => (element.innerHTML = this.toCss()),
       });
     } else {
       this.freeStyle = create({
@@ -89,7 +89,7 @@ export class StyleSheetRenderer extends MemoryRenderer {
         change: (style, oldIndex, newIndex) => {
           styleSheet.deleteRule(oldIndex);
           styleSheet.insertRule(style.getStyles(), newIndex);
-        }
+        },
       });
     }
   }
@@ -164,7 +164,7 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
         ...props,
         ref,
         className,
-        css: undefined // Remove `css` property.
+        css: undefined, // Remove `css` property.
       });
     }),
     { displayName, style }
@@ -178,9 +178,7 @@ function cssValueToString(Style: FreeStyle, cssValue: CssValue): string {
   if (typeof cssValue === "string") return cssValue;
 
   if (typeof cssValue === "function") {
-    const result = cssValue(Style);
-    if (typeof result === "string") return result;
-    return Style.registerStyle(result);
+    return cssValueToString(Style, cssValue(Style));
   }
 
   if (Array.isArray(cssValue)) {
@@ -291,7 +289,7 @@ export interface Css
 /**
  * Functional compute styles.
  */
-export type ComputedCss = (Style: FreeStyle) => string | Css;
+export type ComputedCss = (Style: FreeStyle) => CssValue;
 
 /**
  * Recursive CSS values array.
@@ -302,11 +300,11 @@ export interface CssValueArray extends Array<CssValue> {}
  * Any supported CSS value.
  */
 export type CssValue =
+  | Css
   | CachedCss
   | ComputedCss
-  | Css
   | string
-  | undefined
+  | void
   | CssValueArray;
 
 /**

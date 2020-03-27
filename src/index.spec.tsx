@@ -2,12 +2,12 @@ import * as React from "react";
 import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
 import { create } from "react-test-renderer";
-import { styled, MemoryRenderer, Context } from "./index";
+import { styled, MemoryRenderer, Context, css } from "./index";
 
 describe("index", () => {
   it("should support styled components", () => {
     const Button = styled("button", {
-      color: "red"
+      color: "red",
     });
 
     expect(renderToStaticMarkup(<Button />)).toEqual(
@@ -46,7 +46,7 @@ describe("index", () => {
     const memoryCss = new MemoryRenderer();
 
     const Button = styled("button", {
-      color: "red"
+      color: "red",
     });
 
     const renderer = create(
@@ -73,14 +73,14 @@ describe("index", () => {
 
   it("should compose styled components", () => {
     const Button = styled("button", {
-      color: "red"
+      color: "red",
     });
 
     const LargeButton = styled("button", [
       {
-        fontSize: 10
+        fontSize: 10,
       },
-      Button.style
+      Button.style,
     ]);
 
     expect(renderToStaticMarkup(<LargeButton />)).toEqual(
@@ -88,5 +88,32 @@ describe("index", () => {
     );
 
     expect(LargeButton.style.className).toMatch(/f\w+ f\w+/);
+  });
+
+  it("should compute global styles", () => {
+    const memoryCss = new MemoryRenderer();
+
+    const globalStyle = css((Style) =>
+      Style.registerCss({
+        ".test": {
+          color: "blue",
+        },
+      })
+    );
+
+    const Button = styled("button", {
+      color: "red",
+    });
+
+    expect(
+      renderToStaticMarkup(
+        <Context.Provider value={memoryCss}>
+          <Button css={globalStyle} />
+        </Context.Provider>
+      )
+    ).toEqual(`<button class="${Button.style.className}"></button>`);
+
+    expect(Button.style.className).toMatch(/f\w+/);
+    expect(memoryCss.toCss()).toContain('{color:red}.test{color:blue}');
   });
 });
