@@ -157,10 +157,10 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
     React.forwardRef(function Component(
       props: JSX.IntrinsicElements[T] & { css?: CssValue },
       ref: React.Ref<HTMLElement> | null
-    ) {
+    ): React.ReactElement<JSX.IntrinsicElements[T]> {
       const className = useCss(props.className, style, props.css);
 
-      return React.createElement(type, {
+      return React.createElement<JSX.IntrinsicElements[T]>(type, {
         ...props,
         ref,
         className,
