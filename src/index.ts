@@ -129,7 +129,7 @@ export function useStyle<T extends FreeStyle>(Style: T): T {
  * React hook for dynamically registering CSS values in a component.
  */
 export function useCss(...cssValue: CssValue[]): string {
-  const { className, Style } = React.useMemo(() => css(cssValue), cssValue);
+  const { className, Style } = React.useMemo(() => css(...cssValue), cssValue);
   useStyle(Style);
   return className;
 }
@@ -137,7 +137,7 @@ export function useCss(...cssValue: CssValue[]): string {
 /**
  * Create a cached CSS object.
  */
-export function css(cssValue: CssValue): CachedCss {
+export function css(...cssValue: CssValue[]): CachedCss {
   const Style = create();
   const className = cssValueToString(Style, cssValue);
   return new CachedCss(className, Style);
@@ -148,10 +148,10 @@ export function css(cssValue: CssValue): CachedCss {
  */
 export function styled<T extends keyof JSX.IntrinsicElements>(
   type: T,
-  cssValue?: CssValue
+  ...cssValue: CssValue[]
 ) {
   const displayName = `styled(${type})`;
-  const style = css(cssValue);
+  const style = css(...cssValue);
 
   return Object.assign(
     React.forwardRef(function Component(
@@ -300,11 +300,13 @@ export interface CssValueArray extends Array<CssValue> {}
  * Any supported CSS value.
  */
 export type CssValue =
+  | string
+  | null
+  | undefined
+  | void
   | Css
   | CachedCss
   | ComputedCss
-  | string
-  | void
   | CssValueArray;
 
 /**
