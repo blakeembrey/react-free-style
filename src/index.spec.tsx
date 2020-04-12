@@ -111,9 +111,11 @@ describe("index", () => {
           <Button css={globalStyle} />
         </Context.Provider>
       )
-    ).toEqual(`<button class="${Button.style.className}"></button>`);
+    ).toEqual(
+      `<button class="${Button.style.className} ${globalStyle.className}"></button>`
+    );
 
     expect(Button.style.className).toMatch(/f\w+/);
-    expect(memoryCss.toCss()).toContain('{color:red}.test{color:blue}');
+    expect(memoryCss.toCss()).toContain("{color:red}.test{color:blue}");
   });
 });
