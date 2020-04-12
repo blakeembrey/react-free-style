@@ -156,7 +156,7 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
   return Object.assign(
     React.forwardRef(function Component(
       props: JSX.IntrinsicElements[T] & { css?: CssValue },
-      ref: React.Ref<HTMLElement> | null
+      ref: JSX.IntrinsicElements[T]["ref"]
     ): React.ReactElement<JSX.IntrinsicElements[T]> {
       const className = useCss(props.className, style, props.css);
 
@@ -166,7 +166,9 @@ export function styled<T extends keyof JSX.IntrinsicElements>(
         className,
         css: undefined, // Remove `css` property.
       });
-    }),
+    }) as React.NamedExoticComponent<
+      JSX.IntrinsicElements[T] & { css?: CssValue }
+    >,
     { displayName, style }
   );
 }
