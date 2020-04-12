@@ -44,7 +44,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "3.1 kB"
+      "limit": "3 kB"
     }
   ],
   "jest": {
@@ -108,7 +108,7 @@
     "react": "*"
   },
   "dependencies": {
-    "csstype": "^2.6.7",
-    "free-style": "^3.0.0"
+    "csstype": "^2.6.10",
+    "free-style": "^3.2.2"
   }
 }
