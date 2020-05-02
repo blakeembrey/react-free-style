@@ -73,6 +73,23 @@ const App = () => {
 
 ## Themes
 
+### CSS Variables
+
+The most effective CSS themes I've seen use CSS variables to dynamically change styles, e.g.
+
+```js
+// Register this CSS wherever you want the theme to apply, e.g. `:root`.
+const theme = {
+  "--color": "red",
+};
+
+const Button = styled("button", {
+  color: "var(--color)",
+});
+```
+
+### Context
+
 Use `React.Context` to define a theme and custom components with `css` props. E.g.
 
 ```js

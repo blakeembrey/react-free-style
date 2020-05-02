@@ -2,12 +2,13 @@ import * as React from "react";
 import { render } from "react-dom";
 import { styled, Context, StyleSheetRenderer } from "../dist";
 
-const Container = styled("div", freeStyle => {
-  freeStyle.registerCss({
+const Container = styled("div", (freeStyle) => {
+  freeStyle.registerStyle({
+    $global: true,
     body: {
       fontFamily: "sans-serif",
-      margin: 0
-    }
+      margin: 0,
+    },
   });
 
   return {
@@ -16,7 +17,7 @@ const Container = styled("div", freeStyle => {
     alignItems: "center",
     justifyContent: "center",
     width: "100vw",
-    height: "100vh"
+    height: "100vh",
   };
 });
 
@@ -24,7 +25,7 @@ const Pre = styled("pre", {
   margin: 10,
   maxWidth: 300,
   wordBreak: "break-all",
-  whiteSpace: "normal"
+  whiteSpace: "normal",
 });
 
 function randomColor() {

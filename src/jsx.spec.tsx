@@ -1,7 +1,6 @@
 /** @jsx jsx */
-
 import { renderToStaticMarkup } from "react-dom/server";
-import { jsx } from "./jsx";
+import { jsx } from "./index";
 
 describe("jsx", () => {
   it("should support element tags natively", () => {

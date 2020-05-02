@@ -305,7 +305,6 @@ export type CssValue =
   | string
   | null
   | undefined
-  | void
   | Css
   | CachedCss
   | ComputedCss

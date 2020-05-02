@@ -94,7 +94,8 @@ describe("index", () => {
     const memoryCss = new MemoryRenderer();
 
     const globalStyle = css((Style) =>
-      Style.registerCss({
+      Style.registerStyle({
+        $global: true,
         ".test": {
           color: "blue",
         },

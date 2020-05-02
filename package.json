@@ -44,7 +44,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "3 kB"
+      "limit": "2.4 kB"
     }
   ],
   "jest": {
@@ -87,7 +87,7 @@
     "@types/react-test-renderer": "^16.9.0",
     "html-webpack-plugin": "^4.0.2",
     "husky": "^4.2.3",
-    "jest": "^25.1.0",
+    "jest": "^25.5.3",
     "lint-staged": "^10.0.8",
     "prettier": "^2.0.2",
     "react": "^16.10.2",
@@ -95,20 +95,20 @@
     "react-test-renderer": "^16.10.2",
     "rimraf": "^3.0.0",
     "size-limit": "^4.0.2",
-    "ts-jest": "^25.2.1",
+    "ts-jest": "^25.4.0",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.16.0",
     "tslint-config-standard": "^9.0.0",
     "typescript": "^3.8.3",
     "webpack": "^4.42.0",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.14"
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   },
   "peerDependencies": {
     "react": "*"
   },
   "dependencies": {
     "csstype": "^2.6.10",
-    "free-style": "^3.2.2"
+    "free-style": "^4.0.0"
   }
 }
