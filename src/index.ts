@@ -81,7 +81,12 @@ export class StyleSheetRenderer extends MemoryRenderer {
     } else {
       this.freeStyle = create({
         add: (style, index) => {
-          styleSheet.insertRule(style.getStyles(), index);
+          try {
+            styleSheet.insertRule(style.getStyles(), index);
+          } catch {
+            // Insert a valid noop to avoid indexes drifting.
+            styleSheet.insertRule(".noop{}", index);
+          }
         },
         remove: (_, index) => {
           styleSheet.deleteRule(index);
