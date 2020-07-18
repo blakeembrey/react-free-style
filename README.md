@@ -41,20 +41,6 @@ const App = () => {
 };
 ```
 
-#### Composition
-
-```js
-const LargeButton = styled("button", [
-  {
-    fontSize: 16,
-  },
-  Button.style,
-  {
-    marginBottom: 8,
-  },
-]);
-```
-
 ### JSX
 
 ```js
@@ -71,11 +57,74 @@ const App = () => {
 };
 ```
 
+### Imperative
+
+```js
+import { css, useCss } from "react-free-style";
+
+// Creates "cached CSS":
+const style = css({ color: "red" });
+// But you can also write `const style = { color: "red" }`.
+
+const Button = () => {
+  const className = useCss(style);
+
+  return <button className={className}>Hello world!</button>;
+};
+```
+
+This is how the [`styled`](#styled) and [`jsx`](#jsx) work! Knowing how it works can help you when you need to extract the class name for integrating with an existing UI library using `className`.
+
+## Recipes
+
+### Valid Styles
+
+Every CSS method accepts:
+
+- CSS-in-JS object
+- String, i.e. a class name
+- Cached CSS, created using the `css(...)` method
+- Computed CSS, a function which accepts `Style` and returns a valid style
+- Array of the above
+
+### Composition
+
+Components created using `styled` expose "cached CSS" on the `style` property.
+
+```js
+const LargeButton = styled("button", [
+  {
+    fontSize: 16,
+  },
+  Button.style,
+  {
+    marginBottom: 8,
+  },
+]);
+```
+
+### Animations
+
+A "computed CSS" function can be used to register and use `@keyframes`.
+
+```ts
+import { css } from "react-free-style";
+
+const style = css((Style) => {
+  const animationName = Style.registerStyle({
+    $global: true,
+    "@keyframes &": styles,
+  });
+
+  return { animationName };
+});
+```
+
 ## Themes
 
 ### CSS Variables
 
-The most effective CSS themes I've seen use CSS variables to dynamically change styles, e.g.
+The most effective CSS themes I've seen use [CSS variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) to dynamically change styles.
 
 ```js
 // Register this CSS wherever you want the theme to apply, e.g. `:root`.
@@ -86,11 +135,16 @@ const theme = {
 const Button = styled("button", {
   color: "var(--color)",
 });
+
+// Later on you can change the theme.
+const style = css({
+  "--color": "blue",
+});
 ```
 
 ### Context
 
-Use `React.Context` to define a theme and custom components with `css` props. E.g.
+Use `React.Context` to define a theme and custom components with `css` props.
 
 ```js
 const ThemeContext = React.createContext({
@@ -106,11 +160,11 @@ const Button = () => {
 
 ## Rendering
 
-By default, CSS output is discarded.
+By default, CSS output is discarded (a "no op" useful for testing) because you may have different output requirements depending on the environment.
 
 ### Client-side Rendering
 
-`StyleSheetRenderer` is an efficient CSS renderer for DOM using `CSSStyleSheet` directly with `.insertRule()`.
+`StyleSheetRenderer` is an efficient CSS renderer for browsers.
 
 ```js
 import { StyleSheetRenderer, Context } from "react-free-style";
