@@ -149,31 +149,49 @@ export function css(...cssValue: CssValue[]): CachedCss {
 }
 
 /**
+ * Styled component type.
+ */
+export type StyledComponent<P> = React.NamedExoticComponent<
+  P & {
+    css?: CssValue;
+  }
+> & {
+  displayName: string;
+  style: CachedCss;
+};
+
+/**
  * Type-safe styled component.
  */
 export function styled<T extends keyof JSX.IntrinsicElements>(
   type: T,
   ...cssValue: CssValue[]
-) {
+): StyledComponent<JSX.IntrinsicElements[T]>;
+export function styled<P>(
+  component: React.ComponentType<P>,
+  ...cssValue: CssValue[]
+): StyledComponent<P>;
+export function styled(
+  type: string | React.ComponentType,
+  ...cssValue: CssValue[]
+): StyledComponent<{}> {
   const displayName = `styled(${type})`;
   const style = css(...cssValue);
 
   return Object.assign(
     React.forwardRef(function Component(
-      props: JSX.IntrinsicElements[T] & { css?: CssValue },
-      ref: JSX.IntrinsicElements[T]["ref"]
-    ): React.ReactElement<JSX.IntrinsicElements[T]> {
+      props: { className?: string; css?: CssValue },
+      ref: React.LegacyRef<JSX.IntrinsicElements | React.ComponentType>
+    ) {
       const className = useCss(props.className, style, props.css);
 
-      return React.createElement<JSX.IntrinsicElements[T]>(type, {
+      return React.createElement(type, {
         ...props,
         ref,
-        className,
+        className, // Decorate component using `className`.
         css: undefined, // Remove `css` property.
-      });
-    }) as React.NamedExoticComponent<
-      JSX.IntrinsicElements[T] & { css?: CssValue }
-    >,
+      } as any);
+    }),
     { displayName, style }
   );
 }
