@@ -15,7 +15,7 @@
     "example": "cd example && webpack-dev-server --config webpack.js",
     "prettier": "prettier --write",
     "lint": "tslint \"src/**/*\" --project tsconfig.json",
-    "format": "npm run prettier -- \"*.{json,md,yml}\" \"{src,examples,benchmarks}/**/*.{js,ts}\"",
+    "format": "npm run prettier -- \"{,src/**/,example/**/}*.{js,jsx,ts,tsx,json,css,md,yml,yaml}\"",
     "build": "rimraf dist/ dist.es2015/ && tsc && tsc -P tsconfig.es2015.json",
     "bench:hash": "ts-node benchmarks/hash.ts",
     "bench:perf": "ts-node benchmarks/perf.ts",
@@ -70,10 +70,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,json,css,md}": [
-      "npm run prettier",
-      "git add"
-    ]
+    "*.{js,jsx,ts,tsx,json,css,md,yml,yaml}": "npm run prettier"
   },
   "publishConfig": {
     "access": "public"

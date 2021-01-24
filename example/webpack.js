@@ -6,10 +6,10 @@ module.exports = {
   entry: path.join(__dirname, "app.js"),
   output: {
     path: path.join(__dirname, "dist"),
-    filename: "bundle.js"
+    filename: "bundle.js",
   },
   devServer: {
-    contentBase: path.join(__dirname, "static")
+    contentBase: path.join(__dirname, "static"),
   },
-  plugins: [new HtmlWebpackPlugin()]
+  plugins: [new HtmlWebpackPlugin()],
 };
