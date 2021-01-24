@@ -1,7 +1,7 @@
 import * as React from "react";
 import { renderIntoDocument } from "react-dom/test-utils";
 import { renderToStaticMarkup } from "react-dom/server";
-import { create } from "react-test-renderer";
+import { create, act } from "react-test-renderer";
 import { styled, MemoryRenderer, Context, css } from "./index";
 
 describe("index", () => {
@@ -63,7 +63,7 @@ describe("index", () => {
       `<style id="test">.${Button.style.className}{color:red}</style>`
     );
 
-    renderer.unmount();
+    act(() => renderer.unmount());
 
     expect(memoryCss.toCss()).toEqual("");
     expect(renderToStaticMarkup(memoryCss.toComponent())).toEqual(
