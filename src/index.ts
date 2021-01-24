@@ -1,5 +1,13 @@
 import * as React from "react";
-import { create, Container, Rule, Style, FreeStyle, Styles } from "free-style";
+import {
+  create,
+  Container,
+  Rule,
+  Style,
+  FreeStyle,
+  Styles,
+  PropertyValue,
+} from "free-style";
 import { StandardPropertiesFallback, SvgPropertiesFallback } from "csstype";
 
 /**
@@ -301,14 +309,7 @@ export interface Css
    */
   "@media screen and (max-width: 768px)"?: Css;
 
-  [selector: string]:
-    | null
-    | undefined
-    | boolean
-    | string
-    | number
-    | (boolean | string | number)[]
-    | Css;
+  [selector: string]: PropertyValue | PropertyValue[] | Css;
 }
 
 /**
